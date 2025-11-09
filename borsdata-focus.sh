@@ -2,18 +2,18 @@
 
 # Required parameters:
 # @raycast.schemaVersion 1
-# @raycast.title Messenger Focus
+# @raycast.title Börsdata Focus
 # @raycast.mode silent
 
 # Optional parameters:
-# @raycast.icon 💬
+# @raycast.icon 📈
 
 # Documentation:
 # @raycast.author Anders Bekkevard
 
 # Check if Comet is already running
 if pgrep -x "Comet" > /dev/null; then
-    # Comet is running, focus Messenger Focus tab or open new tab
+    # Comet is running, focus Börsdata Focus tab or open new tab
     osascript <<'APPLESCRIPT_EOF'
 tell application "Comet"
     set targetWindowIndex to -1
@@ -36,7 +36,7 @@ tell application "Comet"
     -- Check if current tab matches the URL pattern
     set currentTabMatches to false
     if currentTabURL is not "" then
-        if currentTabURL contains "messenger.com" then
+        if currentTabURL contains "borsdata.se" then
             set currentTabMatches to true
             set anyMatchingTabFound to true
         end if
@@ -51,7 +51,7 @@ tell application "Comet"
         repeat with t from 1 to (count of windowTabs)
             try
                 set tabURL to URL of tab t of window w
-                if tabURL contains "messenger.com" then
+                if tabURL contains "borsdata.se" then
                     set end of matchingTabs to {windowIndex:w, tabIndex:t}
                     set anyMatchingTabFound to true
                     -- Check if this is the current tab
@@ -100,7 +100,7 @@ tell application "Comet"
         end if
         set frontWindow to window 1
         set tabCount to count of tabs of frontWindow
-        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"https://messenger.com"}
+        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"https://borsdata.se"}
         set active tab index of frontWindow to (tabCount + 1)
     else
         -- Current tab matches but no other matching tab found, just activate (stay on current)
@@ -110,5 +110,5 @@ end tell
 APPLESCRIPT_EOF
 else
     # Comet is not running, launch it normally (not as app)
-    open -a Comet "https://messenger.com"
+    open -a Comet "https://borsdata.se"
 fi

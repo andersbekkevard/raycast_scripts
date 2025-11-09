@@ -1,30 +1,78 @@
 #!/bin/bash
 
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Generate Focus Scripts
+# @raycast.mode silent
+
+# Optional parameters:
+# @raycast.icon ⚙️
+
+# Documentation:
+# @raycast.author Anders Bekkevard
+# @raycast.description Regenerates all focus scripts from focus-configs.json
+
 # Metascript to generate focus scripts
 # This script generates all focus scripts from a single template
 #
 # Usage: ./generate-focus-scripts.sh
 #
 # To add a new focus script:
-# 1. Add a new entry to the configs array below
-# 2. Format: "name|Title|icon|url_pattern1 url_pattern2|https://default-url.com"
+# 1. Edit focus-configs.json and add a new entry
+# 2. Format: {"name": "...", "title": "...", "icon": "...", "url_patterns": [...], "default_url": "..."}
 # 3. Run this script to regenerate all focus scripts
 #
 # The generated scripts are identical in performance to manually written ones,
 # as they use the same optimized search logic.
 
-# Configuration: name|title|icon|url_patterns (space-separated)|default_url
-configs=(
-    "chatgpt|ChatGPT Focus|🤖|chat.openai.com chatgpt.com|https://chatgpt.com"
-    "bb|Blackboard Focus|📚|blackboard.com ntnu.blackboard.com|https://ntnu.blackboard.com"
-    "messenger|Messenger Focus|💬|messenger.com|https://messenger.com"
-    "meet|Google Meet Focus|📹|meet.google.com|https://meet.google.com"
-    "toggl|Toggl Focus|⏱️|track.toggl.com toggl.com|https://track.toggl.com/timer"
-    "todoist|Todoist Focus|✅|app.todoist.com todoist.com|https://app.todoist.com/app/project/studie-6RWxW3r5GcXRrr8v"
-    "youtube|YouTube Focus|📺|youtube.com www.youtube.com|https://www.youtube.com/"
-    "calendar|Google Calendar Focus|📅|calendar.google.com|https://calendar.google.com/calendar/u/0/r"
-    "gmail|Gmail Focus|📧|mail.google.com gmail.com|https://mail.google.com/mail/u/0/#inbox"
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="${SCRIPT_DIR}/focus-configs.json"
+
+# Check if config file exists
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Error: Config file not found: $CONFIG_FILE"
+    exit 1
+fi
+
+# Read configs from JSON file using Python
+# Convert JSON array to bash array format: "name|title|icon|url_pattern1 url_pattern2|default_url"
+export CONFIG_FILE
+configs=()
+while IFS= read -r line; do
+    configs+=("$line")
+done < <(python3 <<'PYTHON_EOF'
+import json
+import sys
+import os
+
+config_file = os.environ.get('CONFIG_FILE')
+if not config_file:
+    print("Error: CONFIG_FILE environment variable not set", file=sys.stderr)
+    sys.exit(1)
+
+try:
+    with open(config_file, 'r', encoding='utf-8') as f:
+        configs = json.load(f)
+    
+    for config in configs:
+        name = config.get('name', '')
+        title = config.get('title', '')
+        icon = config.get('icon', '')
+        url_patterns = ' '.join(config.get('url_patterns', []))
+        default_url = config.get('default_url', '')
+        print(f'{name}|{title}|{icon}|{url_patterns}|{default_url}')
+except Exception as e:
+    print(f'Error reading config file: {e}', file=sys.stderr)
+    sys.exit(1)
+PYTHON_EOF
 )
+
+# Check if we got any configs
+if [ ${#configs[@]} -eq 0 ]; then
+    echo "Error: No configs found in $CONFIG_FILE"
+    exit 1
+fi
 
 # Template for the AppleScript URL check condition
 generate_url_condition() {
@@ -64,6 +112,18 @@ generate_script() {
         fi
     done
     
+    # Build URL condition for AppleScript (for currentTabURL check)
+    local current_url_condition=""
+    first=true
+    for pattern in $url_patterns; do
+        if [ "$first" = true ]; then
+            current_url_condition="currentTabURL contains \"$pattern\""
+            first=false
+        else
+            current_url_condition="${current_url_condition} or currentTabURL contains \"$pattern\""
+        fi
+    done
+    
     # Build URL condition for AppleScript (for tabURL check)
     local tab_url_condition=""
     first=true
@@ -98,66 +158,81 @@ tell application "Comet"
     set targetWindowIndex to -1
     set targetTabIndex to -1
     set foundTab to false
+    set currentTabURL to ""
+    set currentWindowIndex to -1
+    set currentTabIndex to -1
+    set anyMatchingTabFound to false
     
-    -- Optimized search: check frontmost window and active tab first (most common case)
+    -- Get current active tab info first
     if (count of windows) > 0 then
         try
-            set activeTabURL to URL of active tab of window 1
-            if ${active_url_condition} then
-                set targetWindowIndex to 1
-                set targetTabIndex to active tab index of window 1
-                set foundTab to true
-            end if
+            set currentTabURL to URL of active tab of window 1
+            set currentWindowIndex to 1
+            set currentTabIndex to active tab index of window 1
         end try
-        
-        -- If not found in active tab, check other tabs in frontmost window
-        if not foundTab then
-            set windowTabs to tabs of window 1
-            repeat with t from 1 to (count of windowTabs)
-                try
-                    set tabURL to URL of tab t of window 1
-                    if ${tab_url_condition} then
-                        set targetWindowIndex to 1
-                        set targetTabIndex to t
-                        set foundTab to true
-                        exit repeat
-                    end if
-                end try
-            end repeat
+    end if
+    
+    -- Check if current tab matches the URL pattern
+    set currentTabMatches to false
+    if currentTabURL is not "" then
+        if ${current_url_condition} then
+            set currentTabMatches to true
+            set anyMatchingTabFound to true
         end if
     end if
     
-    -- If still not found, search other windows
-    if not foundTab then
-        repeat with w from 2 to (count of windows)
-            set windowTabs to tabs of window w
-            repeat with t from 1 to (count of windowTabs)
-                try
-                    set tabURL to URL of tab t of window w
-                    if ${tab_url_condition} then
-                        set targetWindowIndex to w
-                        set targetTabIndex to t
-                        set foundTab to true
-                        exit repeat
+    -- Collect all matching tabs in left-to-right order (window by window, tab by tab)
+    set matchingTabs to {}
+    set currentTabPosition to -1
+    
+    repeat with w from 1 to (count of windows)
+        set windowTabs to tabs of window w
+        repeat with t from 1 to (count of windowTabs)
+            try
+                set tabURL to URL of tab t of window w
+                if ${tab_url_condition} then
+                    set end of matchingTabs to {windowIndex:w, tabIndex:t}
+                    set anyMatchingTabFound to true
+                    -- Check if this is the current tab
+                    if currentWindowIndex is w and currentTabIndex is t then
+                        set currentTabPosition to (count of matchingTabs)
                     end if
-                end try
-            end repeat
-            if foundTab then exit repeat
+                end if
+            end try
         end repeat
+    end repeat
+    
+    -- Determine which tab to switch to
+    if (count of matchingTabs) > 0 then
+        if currentTabMatches and currentTabPosition > 0 then
+            -- Current tab matches, go to next one (wrap around)
+            if currentTabPosition < (count of matchingTabs) then
+                -- Go to next tab
+                set nextTab to item (currentTabPosition + 1) of matchingTabs
+            else
+                -- Wrap around to first tab
+                set nextTab to item 1 of matchingTabs
+            end if
+            set targetWindowIndex to windowIndex of nextTab
+            set targetTabIndex to tabIndex of nextTab
+            set foundTab to true
+        else
+            -- Current tab doesn't match, go to first matching tab
+            set firstTab to item 1 of matchingTabs
+            set targetWindowIndex to windowIndex of firstTab
+            set targetTabIndex to tabIndex of firstTab
+            set foundTab to true
+        end if
     end if
     
     if foundTab then
-        -- Tab exists, focus it
-        -- First activate Comet, then bring the window containing the tab to front
+        -- Found another matching tab, focus it
         activate
-        -- Store reference to the target window before changing its index
         set targetWindow to window targetWindowIndex
-        -- Bring the window to front (this makes it window 1)
         set index of targetWindow to 1
-        -- Now switch to the correct tab in the now-frontmost window
         set active tab index of window 1 to targetTabIndex
-    else
-        -- No tab found, create a new tab
+    else if not anyMatchingTabFound then
+        -- No matching tab found at all, create a new tab
         activate
         if (count of windows) is 0 then
             make new window
@@ -166,6 +241,9 @@ tell application "Comet"
         set tabCount to count of tabs of frontWindow
         set newTab to make new tab at end of tabs of frontWindow with properties {URL:"${default_url}"}
         set active tab index of frontWindow to (tabCount + 1)
+    else
+        -- Current tab matches but no other matching tab found, just activate (stay on current)
+        activate
     end if
 end tell
 APPLESCRIPT_EOF
