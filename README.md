@@ -1,1 +1,1 @@
-Simple raycast scripts in bash to focus tabs for selected urls (i recommend this a lot).
+Simple raycast scripts in bash to focus tabs for selected urls (i recommend this a lot). Also some other scripts here
