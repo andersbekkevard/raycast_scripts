@@ -4,84 +4,96 @@
     "title": "ChatGPT Focus",
     "icon": "🤖",
     "url_patterns": ["chat.openai.com", "chatgpt.com"],
-    "default_url": "https://chatgpt.com"
+    "default_url": "https://chatgpt.com",
+    "use_history": false
   },
   {
     "name": "bb",
     "title": "Blackboard Focus",
     "icon": "📚",
     "url_patterns": ["blackboard.com", "ntnu.blackboard.com"],
-    "default_url": "https://ntnu.blackboard.com"
+    "default_url": "https://ntnu.blackboard.com",
+    "use_history": true
   },
   {
     "name": "messenger",
     "title": "Messenger Focus",
     "icon": "💬",
     "url_patterns": ["messenger.com"],
-    "default_url": "https://messenger.com"
+    "default_url": "https://messenger.com",
+    "use_history": false
   },
   {
     "name": "meet",
     "title": "Google Meet Focus",
     "icon": "📹",
     "url_patterns": ["meet.google.com"],
-    "default_url": "https://meet.google.com"
+    "default_url": "https://meet.google.com",
+    "use_history": true
   },
   {
     "name": "toggl",
     "title": "Toggl Focus",
     "icon": "⏱️",
     "url_patterns": ["track.toggl.com", "toggl.com"],
-    "default_url": "https://track.toggl.com/timer"
+    "default_url": "https://track.toggl.com/timer",
+    "use_history": false
   },
   {
     "name": "todoist",
     "title": "Todoist Focus",
     "icon": "✅",
     "url_patterns": ["app.todoist.com", "todoist.com"],
-    "default_url": "https://app.todoist.com/app/project/studie-6RWxW3r5GcXRrr8v"
+    "default_url": "https://app.todoist.com/app/project/studie-6RWxW3r5GcXRrr8v",
+    "use_history": true
   },
   {
     "name": "youtube",
     "title": "YouTube Focus",
     "icon": "📺",
     "url_patterns": ["youtube.com", "www.youtube.com"],
-    "default_url": "https://www.youtube.com/"
+    "default_url": "https://www.youtube.com/",
+    "use_history": true
   },
   {
     "name": "calendar",
     "title": "Google Calendar Focus",
     "icon": "📅",
     "url_patterns": ["calendar.google.com"],
-    "default_url": "https://calendar.google.com/calendar/u/0/r"
+    "default_url": "https://calendar.google.com/calendar/u/0/r",
+    "use_history": false
   },
   {
     "name": "gmail",
     "title": "Gmail Focus",
     "icon": "📧",
     "url_patterns": ["mail.google.com", "gmail.com"],
-    "default_url": "https://mail.google.com/mail/u/0/#inbox"
+    "default_url": "https://mail.google.com/mail/u/0/#inbox",
+    "use_history": true
   },
   {
     "name": "panopto",
     "title": "Panopto Focus",
     "icon": "🎥",
     "url_patterns": ["panopto.eu"],
-    "default_url": "https://ntnu.cloud.panopto.eu/"
+    "default_url": "https://ntnu.cloud.panopto.eu/",
+    "use_history": true
   },
   {
     "name": "github",
     "title": "GitHub Focus",
     "icon": "🐙",
     "url_patterns": ["github.com"],
-    "default_url": "https://github.com"
+    "default_url": "https://github.com",
+    "use_history": true
   },
   {
     "name": "borsdata",
     "title": "Börsdata Focus",
     "icon": "📈",
     "url_patterns": ["borsdata.se"],
-    "default_url": "https://borsdata.se"
+    "default_url": "https://borsdata.se",
+    "use_history": false
   }
 ]
 

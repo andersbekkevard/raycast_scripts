@@ -11,11 +11,52 @@
 # Documentation:
 # @raycast.author Anders Bekkevard
 
+# Function to get most recent URL from Comet history
+get_most_recent_url() {
+    local history_db="$HOME/Library/Application Support/Comet/Default/History"
+    local temp_history="/tmp/comet_history_temp_$$.db"
+    
+    # Check if history database exists
+    if [ ! -f "$history_db" ]; then
+        echo "https://ntnu.blackboard.com"
+        return
+    fi
+    
+    # Copy history DB to avoid lock issues (browser may have it locked)
+    if ! cp "$history_db" "$temp_history" 2>/dev/null; then
+        echo "https://ntnu.blackboard.com"
+        return
+    fi
+    
+    # Query for most recent matching URL
+    # Filter out common non-content pages
+    local most_recent_url
+    most_recent_url=$(sqlite3 "$temp_history"         "SELECT url FROM urls 
+         WHERE (url LIKE '%blackboard.com%' OR url LIKE '%ntnu.blackboard.com%')
+         AND url NOT LIKE '%/Pages/Auth/Login.aspx%'
+         AND url NOT LIKE '%/Pages/Auth/Logout.aspx%'
+         ORDER BY last_visit_time DESC 
+         LIMIT 1;" 2>/dev/null)
+    
+    # Clean up temp file
+    rm -f "$temp_history"
+    
+    # Return found URL or default
+    if [ -n "$most_recent_url" ]; then
+        echo "$most_recent_url"
+    else
+        echo "https://ntnu.blackboard.com"
+    fi
+}
+
+# Get the target URL from history
+TARGET_URL=$(get_most_recent_url)
 # Check if Comet is already running
 if pgrep -x "Comet" > /dev/null; then
     # Comet is running, focus Blackboard Focus tab or open new tab
-    osascript <<'APPLESCRIPT_EOF'
+    osascript <<APPLESCRIPT_EOF
 tell application "Comet"
+    set targetURL to "$TARGET_URL"
     set targetWindowIndex to -1
     set targetTabIndex to -1
     set foundTab to false
@@ -100,7 +141,7 @@ tell application "Comet"
         end if
         set frontWindow to window 1
         set tabCount to count of tabs of frontWindow
-        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"https://ntnu.blackboard.com"}
+        set newTab to make new tab at end of tabs of frontWindow with properties {URL:targetURL}
         set active tab index of frontWindow to (tabCount + 1)
     else
         -- Current tab matches but no other matching tab found, just activate (stay on current)
@@ -110,8 +151,9 @@ end tell
 APPLESCRIPT_EOF
 else
     # Comet is not running, launch it and wait for tabs to restore, then search
-    osascript <<'APPLESCRIPT_EOF'
+    osascript <<APPLESCRIPT_EOF
 tell application "Comet"
+    set targetURL to "$TARGET_URL"
     -- Launch Comet without opening a specific URL (so it restores previous tabs)
     activate
     
@@ -226,7 +268,7 @@ tell application "Comet"
         end if
         set frontWindow to window 1
         set tabCount to count of tabs of frontWindow
-        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"https://ntnu.blackboard.com"}
+        set newTab to make new tab at end of tabs of frontWindow with properties {URL:targetURL}
         set active tab index of frontWindow to (tabCount + 1)
     else
         -- Current tab matches but no other matching tab found, just stay on current

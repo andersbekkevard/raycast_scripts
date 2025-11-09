@@ -1,160 +1,73 @@
 #!/bin/bash
 
+# Example script demonstrating how to open the most recently visited Panopto URL
+# from Comet browser history instead of a hardcoded default URL
+
 # Required parameters:
 # @raycast.schemaVersion 1
-# @raycast.title Generate Focus Scripts
+# @raycast.title Panopto History Example
 # @raycast.mode silent
 
 # Optional parameters:
-# @raycast.icon ⚙️
+# @raycast.icon 🎥
 
 # Documentation:
 # @raycast.author Anders Bekkevard
-# @raycast.description Regenerates all focus scripts from focus-configs.json
+# @raycast.description Opens most recently visited panopto.eu URL from browser history
 
-# Metascript to generate focus scripts
-# This script generates all focus scripts from a single template
-#
-# Usage: ./generate-focus-scripts.sh
-#
-# To add a new focus script:
-# 1. Edit focus-configs.json and add a new entry
-# 2. Format: {"name": "...", "title": "...", "icon": "...", "url_patterns": [...], "default_url": "..."}
-# 3. Run this script to regenerate all focus scripts
-#
-# The generated scripts are identical in performance to manually written ones,
-# as they use the same optimized search logic.
+# Default fallback URL
+DEFAULT_URL="https://ntnu.cloud.panopto.eu/"
 
-# Get the directory where this script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_FILE="${SCRIPT_DIR}/focus-configs.json"
-
-# Check if config file exists
-if [ ! -f "$CONFIG_FILE" ]; then
-    echo "Error: Config file not found: $CONFIG_FILE"
-    exit 1
-fi
-
-# Read configs from JSON file using Python
-# Convert JSON array to bash array format: "name|title|icon|url_pattern1 url_pattern2|default_url"
-export CONFIG_FILE
-configs=()
-while IFS= read -r line; do
-    configs+=("$line")
-done < <(python3 <<'PYTHON_EOF'
-import json
-import sys
-import os
-
-config_file = os.environ.get('CONFIG_FILE')
-if not config_file:
-    print("Error: CONFIG_FILE environment variable not set", file=sys.stderr)
-    sys.exit(1)
-
-try:
-    with open(config_file, 'r', encoding='utf-8') as f:
-        configs = json.load(f)
+# Function to get most recent Panopto URL from Comet history
+get_most_recent_panopto_url() {
+    local history_db="$HOME/Library/Application Support/Comet/Default/History"
+    local temp_history="/tmp/comet_history_temp_$$.db"
     
-    for config in configs:
-        name = config.get('name', '')
-        title = config.get('title', '')
-        icon = config.get('icon', '')
-        url_patterns = ' '.join(config.get('url_patterns', []))
-        default_url = config.get('default_url', '')
-        print(f'{name}|{title}|{icon}|{url_patterns}|{default_url}')
-except Exception as e:
-    print(f'Error reading config file: {e}', file=sys.stderr)
-    sys.exit(1)
-PYTHON_EOF
-)
-
-# Check if we got any configs
-if [ ${#configs[@]} -eq 0 ]; then
-    echo "Error: No configs found in $CONFIG_FILE"
-    exit 1
-fi
-
-# Template for the AppleScript URL check condition
-generate_url_condition() {
-    local patterns="$1"
-    local condition=""
-    local first=true
+    # Check if history database exists
+    if [ ! -f "$history_db" ]; then
+        echo "$DEFAULT_URL"
+        return
+    fi
     
-    for pattern in $patterns; do
-        if [ "$first" = true ]; then
-            condition="activeTabURL contains \"$pattern\""
-            first=false
-        else
-            condition="$condition or activeTabURL contains \"$pattern\""
-        fi
-    done
+    # Copy history DB to avoid lock issues (browser may have it locked)
+    if ! cp "$history_db" "$temp_history" 2>/dev/null; then
+        echo "$DEFAULT_URL"
+        return
+    fi
     
-    echo "$condition"
+    # Query for most recent panopto.eu URL
+    # Filter out common non-content pages
+    local most_recent_url
+    most_recent_url=$(sqlite3 "$temp_history" \
+        "SELECT url FROM urls 
+         WHERE url LIKE '%panopto.eu%' 
+         AND url NOT LIKE '%/Pages/Auth/Login.aspx%'
+         AND url NOT LIKE '%/Pages/Auth/Logout.aspx%'
+         ORDER BY last_visit_time DESC 
+         LIMIT 1;" 2>/dev/null)
+    
+    # Clean up temp file
+    rm -f "$temp_history"
+    
+    # Return found URL or default
+    if [ -n "$most_recent_url" ]; then
+        echo "$most_recent_url"
+    else
+        echo "$DEFAULT_URL"
+    fi
 }
 
-# Generate a focus script
-generate_script() {
-    local name="$1"
-    local title="$2"
-    local icon="$3"
-    local url_patterns="$4"
-    local default_url="$5"
-    
-    # Build URL condition for AppleScript (for activeTabURL check)
-    local active_url_condition=""
-    local first=true
-    for pattern in $url_patterns; do
-        if [ "$first" = true ]; then
-            active_url_condition="activeTabURL contains \"$pattern\""
-            first=false
-        else
-            active_url_condition="${active_url_condition} or activeTabURL contains \"$pattern\""
-        fi
-    done
-    
-    # Build URL condition for AppleScript (for currentTabURL check)
-    local current_url_condition=""
-    first=true
-    for pattern in $url_patterns; do
-        if [ "$first" = true ]; then
-            current_url_condition="currentTabURL contains \"$pattern\""
-            first=false
-        else
-            current_url_condition="${current_url_condition} or currentTabURL contains \"$pattern\""
-        fi
-    done
-    
-    # Build URL condition for AppleScript (for tabURL check)
-    local tab_url_condition=""
-    first=true
-    for pattern in $url_patterns; do
-        if [ "$first" = true ]; then
-            tab_url_condition="tabURL contains \"$pattern\""
-            first=false
-        else
-            tab_url_condition="${tab_url_condition} or tabURL contains \"$pattern\""
-        fi
-    done
-    
-    cat > "${name}-focus.sh" <<EOF
-#!/bin/bash
+# Get the target URL
+TARGET_URL=$(get_most_recent_panopto_url)
 
-# Required parameters:
-# @raycast.schemaVersion 1
-# @raycast.title ${title}
-# @raycast.mode silent
-
-# Optional parameters:
-# @raycast.icon ${icon}
-
-# Documentation:
-# @raycast.author Anders Bekkevard
+echo "Using URL: $TARGET_URL"
 
 # Check if Comet is already running
 if pgrep -x "Comet" > /dev/null; then
-    # Comet is running, focus ${title} tab or open new tab
-    osascript <<'APPLESCRIPT_EOF'
+    # Comet is running, focus Panopto tab or open new tab
+    osascript <<APPLESCRIPT_EOF
 tell application "Comet"
+    set targetURL to "$TARGET_URL"
     set targetWindowIndex to -1
     set targetTabIndex to -1
     set foundTab to false
@@ -175,7 +88,7 @@ tell application "Comet"
     -- Check if current tab matches the URL pattern
     set currentTabMatches to false
     if currentTabURL is not "" then
-        if ${current_url_condition} then
+        if currentTabURL contains "panopto.eu" then
             set currentTabMatches to true
             set anyMatchingTabFound to true
         end if
@@ -190,7 +103,7 @@ tell application "Comet"
         repeat with t from 1 to (count of windowTabs)
             try
                 set tabURL to URL of tab t of window w
-                if ${tab_url_condition} then
+                if tabURL contains "panopto.eu" then
                     set end of matchingTabs to {windowIndex:w, tabIndex:t}
                     set anyMatchingTabFound to true
                     -- Check if this is the current tab
@@ -232,14 +145,14 @@ tell application "Comet"
         set index of targetWindow to 1
         set active tab index of window 1 to targetTabIndex
     else if not anyMatchingTabFound then
-        -- No matching tab found at all, create a new tab
+        -- No matching tab found at all, create a new tab with URL from history
         activate
         if (count of windows) is 0 then
             make new window
         end if
         set frontWindow to window 1
         set tabCount to count of tabs of frontWindow
-        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"${default_url}"}
+        set newTab to make new tab at end of tabs of frontWindow with properties {URL:targetURL}
         set active tab index of frontWindow to (tabCount + 1)
     else
         -- Current tab matches but no other matching tab found, just activate (stay on current)
@@ -249,8 +162,9 @@ end tell
 APPLESCRIPT_EOF
 else
     # Comet is not running, launch it and wait for tabs to restore, then search
-    osascript <<'APPLESCRIPT_EOF'
+    osascript <<APPLESCRIPT_EOF
 tell application "Comet"
+    set targetURL to "$TARGET_URL"
     -- Launch Comet without opening a specific URL (so it restores previous tabs)
     activate
     
@@ -303,7 +217,7 @@ tell application "Comet"
     -- Check if current tab matches the URL pattern
     set currentTabMatches to false
     if currentTabURL is not "" then
-        if ${current_url_condition} then
+        if currentTabURL contains "panopto.eu" then
             set currentTabMatches to true
             set anyMatchingTabFound to true
         end if
@@ -318,7 +232,7 @@ tell application "Comet"
         repeat with t from 1 to (count of windowTabs)
             try
                 set tabURL to URL of tab t of window w
-                if ${tab_url_condition} then
+                if tabURL contains "panopto.eu" then
                     set end of matchingTabs to {windowIndex:w, tabIndex:t}
                     set anyMatchingTabFound to true
                     -- Check if this is the current tab
@@ -359,13 +273,13 @@ tell application "Comet"
         set index of targetWindow to 1
         set active tab index of window 1 to targetTabIndex
     else if not anyMatchingTabFound then
-        -- No matching tab found at all, create a new tab
+        -- No matching tab found at all, create a new tab with URL from history
         if (count of windows) is 0 then
             make new window
         end if
         set frontWindow to window 1
         set tabCount to count of tabs of frontWindow
-        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"${default_url}"}
+        set newTab to make new tab at end of tabs of frontWindow with properties {URL:targetURL}
         set active tab index of frontWindow to (tabCount + 1)
     else
         -- Current tab matches but no other matching tab found, just stay on current
@@ -373,18 +287,4 @@ tell application "Comet"
 end tell
 APPLESCRIPT_EOF
 fi
-EOF
-    
-    chmod +x "${name}-focus.sh"
-    echo "Generated ${name}-focus.sh"
-}
-
-# Generate all scripts
-for config in "${configs[@]}"; do
-    IFS='|' read -r name title icon url_patterns default_url <<< "$config"
-    generate_script "$name" "$title" "$icon" "$url_patterns" "$default_url"
-done
-
-echo ""
-echo "All focus scripts generated successfully!"
 
