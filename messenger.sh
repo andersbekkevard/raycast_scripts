@@ -24,11 +24,29 @@ tell application "Comet"
     set messengerIndex to -1
     set windowCount to count of windows
     
-    -- Find the Messenger window
+    -- Find the Messenger window by checking the active tab's URL
+    -- This works even when the window title changes
     repeat with i from 1 to windowCount
         set w to window i
-        set windowTitle to name of w
-        if windowTitle contains "Messenger" or windowTitle contains "messenger" or windowTitle contains "messenger.com" then
+        set isMessengerWindow to false
+        
+        -- Check the active tab's URL (most reliable method)
+        try
+            set tabURL to URL of active tab of w
+            if tabURL contains "messenger.com" then
+                set isMessengerWindow to true
+            end if
+        end try
+        
+        -- Fallback: Check window title for Messenger indicators (for initial load)
+        if not isMessengerWindow then
+            set windowTitle to name of w
+            if windowTitle contains "Messenger" or windowTitle contains "messenger" or windowTitle contains "messenger.com" then
+                set isMessengerWindow to true
+            end if
+        end if
+        
+        if isMessengerWindow then
             set messengerWindow to w
             set messengerIndex to i
             exit repeat

@@ -24,11 +24,29 @@ tell application "Comet"
     set chatgptIndex to -1
     set windowCount to count of windows
     
-    -- Find the ChatGPT window
+    -- Find the ChatGPT window by checking the active tab's URL
+    -- This works even when the window title changes to the conversation name
     repeat with i from 1 to windowCount
         set w to window i
-        set windowTitle to name of w
-        if windowTitle contains "ChatGPT" or windowTitle contains "chatgpt" or windowTitle contains "chat.openai.com" then
+        set isChatGPTWindow to false
+        
+        -- Check the active tab's URL (most reliable method)
+        try
+            set tabURL to URL of active tab of w
+            if tabURL contains "chat.openai.com" or tabURL contains "chatgpt.com" then
+                set isChatGPTWindow to true
+            end if
+        end try
+        
+        -- Fallback: Check window title for ChatGPT indicators (for initial load)
+        if not isChatGPTWindow then
+            set windowTitle to name of w
+            if windowTitle contains "ChatGPT" or windowTitle contains "chatgpt" or windowTitle contains "chat.openai.com" or windowTitle contains "chatgpt.com" then
+                set isChatGPTWindow to true
+            end if
+        end if
+        
+        if isChatGPTWindow then
             set chatgptWindow to w
             set chatgptIndex to i
             exit repeat
