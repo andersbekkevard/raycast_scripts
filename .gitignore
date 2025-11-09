@@ -1,0 +1,46 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+ENV/
+
+# Ruby
+*.gem
+*.rbc
+.bundle/
+vendor/bundle/
+.rvmrc
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+*.cache
+
+# Raycast
+.raycast/
+

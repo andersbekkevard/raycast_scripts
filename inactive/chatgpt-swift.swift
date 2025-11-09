@@ -3,7 +3,7 @@
 // Required parameters:
 // @raycast.schemaVersion 1
 // @raycast.title ChatGPT Toggle (Swift)
-// @raycast.mode fullOutput
+// @raycast.mode silent
 
 // Optional parameters:
 // @raycast.icon 🤖
@@ -103,8 +103,8 @@ if chatGPTWindow != nil, let comet = cometApps.first {
         var error: NSDictionary?
         appleScript?.executeAndReturnError(&error)
         
-        if let error = error {
-            print("⚠️ AppleScript error: \\(error)")
+        if let err = error {
+            print("⚠️ AppleScript error: \\(err)")
         }
     } else {
         // ChatGPT window exists but not in focus, bring it to front using AppleScript
@@ -127,8 +127,8 @@ if chatGPTWindow != nil, let comet = cometApps.first {
         var error: NSDictionary?
         appleScript?.executeAndReturnError(&error)
         
-        if let error = error {
-            print("⚠️ AppleScript error: \\(error)")
+        if let err = error {
+            print("⚠️ AppleScript error: \\(err)")
         }
     }
 } else {

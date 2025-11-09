@@ -2,68 +2,69 @@
 
 # Required parameters:
 # @raycast.schemaVersion 1
-# @raycast.title ChatGPT Toggle (Bash)
+# @raycast.title Messenger Toggle
 # @raycast.mode silent
 
 # Optional parameters:
-# @raycast.icon 🤖
+# @raycast.icon 💬
 
 # Documentation:
 # @raycast.author Anders Bekkevard
 
 # Check if Comet is already running
 if pgrep -x "Comet" > /dev/null; then
-    # Comet is running, toggle ChatGPT window
+    # Comet is running, toggle Messenger window
     osascript <<'EOF'
 tell application "System Events"
     set cometIsFrontmost to (name of first application process whose frontmost is true) is "Comet"
 end tell
 
 tell application "Comet"
-    set chatgptWindow to missing value
-    set chatgptIndex to -1
+    set messengerWindow to missing value
+    set messengerIndex to -1
     set windowCount to count of windows
     
-    -- Find the ChatGPT window
+    -- Find the Messenger window
     repeat with i from 1 to windowCount
         set w to window i
         set windowTitle to name of w
-        if windowTitle contains "ChatGPT" or windowTitle contains "chatgpt" or windowTitle contains "chat.openai.com" then
-            set chatgptWindow to w
-            set chatgptIndex to i
+        if windowTitle contains "Messenger" or windowTitle contains "messenger" or windowTitle contains "messenger.com" then
+            set messengerWindow to w
+            set messengerIndex to i
             exit repeat
         end if
     end repeat
     
-    if chatgptIndex is -1 then
-        -- No ChatGPT window found, create one
-        do shell script "/Applications/Comet.app/Contents/MacOS/Comet --app='https://chatgpt.com' &> /dev/null &"
-    else if cometIsFrontmost and chatgptIndex is 1 then
-        -- ChatGPT is in focus, toggle it off
+    if messengerIndex is -1 then
+        -- No Messenger window found, create one
+        do shell script "/Applications/Comet.app/Contents/MacOS/Comet --app='https://messenger.com' &> /dev/null &"
+    else if cometIsFrontmost and messengerIndex is 1 then
+        -- Messenger is in focus, toggle it off
         if windowCount > 1 then
             -- Multiple windows: bring next window to front
-            set nextWindowIndex to chatgptIndex + 1
+            set nextWindowIndex to messengerIndex + 1
             if nextWindowIndex > windowCount then
                 set nextWindowIndex to 1
             end if
             
-            if nextWindowIndex is not chatgptIndex then
+            if nextWindowIndex is not messengerIndex then
                 set index of window nextWindowIndex to 1
             end if
         else
-            -- Only ChatGPT window: hide the app
+            -- Only Messenger window: hide the app
             tell application "System Events"
                 set visible of process "Comet" to false
             end tell
         end if
     else
-        -- ChatGPT exists but not in focus, bring it to front
+        -- Messenger exists but not in focus, bring it to front
         activate
-        set index of chatgptWindow to 1
+        set index of messengerWindow to 1
     end if
 end tell
 EOF
 else
     # Comet is not running, launch it
-    /Applications/Comet.app/Contents/MacOS/Comet --app="https://chatgpt.com" &
+    /Applications/Comet.app/Contents/MacOS/Comet --app="https://messenger.com" &
 fi
+
