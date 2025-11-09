@@ -178,148 +178,116 @@ tell application "Notes"
             set targetNote to make new note at targetFolder with properties {name:"${NOTE_NAME}", body:""}
         end if
         
-        -- Get current note body (as raw text to preserve formatting)
-        set currentBody to body of targetNote as string
+        -- Get current note body
+        set currentBody to body of targetNote
         
-        -- Extract title if it exists (first line if it's "Scribbledown" or similar)
-        set noteTitle to ""
-        set contentWithoutTitle to currentBody
-        set lineBreak to return
-        
-        -- Check if body starts with title
+        -- Check for duplicate (simple check against last entry)
+        set isDuplicate to false
         if currentBody is not "" then
-            set AppleScript's text item delimiters to lineBreak
-            set bodyLines to text items of currentBody
-            set AppleScript's text item delimiters to ""
-            
-            if (count of bodyLines) > 0 then
-                set firstLine to item 1 of bodyLines
-                -- Check if first line is a title (not a timestamp entry)
-                if firstLine does not contain "[" or firstLine does not contain "]" then
-                    -- First line might be a title, check if it's "Scribbledown" or similar
-                    if firstLine is "${NOTE_NAME}" or firstLine contains "${NOTE_NAME}" then
-                        set noteTitle to firstLine & lineBreak & lineBreak
-                        -- Get content after title (preserve all formatting including multiple newlines)
-                        if (count of bodyLines) > 1 then
-                            -- Rebuild content starting from line 2, preserving original line breaks
-                            set contentWithoutTitle to ""
-                            repeat with i from 2 to (count of bodyLines)
-                                if i is 2 then
-                                    set contentWithoutTitle to item i of bodyLines
-                                else
-                                    set contentWithoutTitle to contentWithoutTitle & lineBreak & item i of bodyLines
+            try
+                set AppleScript's text item delimiters to return
+                set bodyLines to text items of currentBody
+                set AppleScript's text item delimiters to ""
+                
+                -- Check first few lines for duplicate
+                if (count of bodyLines) > 1 then
+                    set firstLine to item 1 of bodyLines
+                    set secondLine to item 2 of bodyLines
+                    -- If first line is title, check second entry
+                    if firstLine does not contain "[" then
+                        if (count of bodyLines) > 2 then
+                            set secondLine to item 3 of bodyLines
+                        end if
+                    end if
+                    -- Check if content matches
+                    if secondLine is newTextContent then
+                        if firstLine contains "[" and firstLine contains "]" then
+                            set AppleScript's text item delimiters to "]"
+                            set datePart to text item 1 of firstLine
+                            set AppleScript's text item delimiters to "["
+                            set datePart to text item 2 of datePart
+                            set AppleScript's text item delimiters to ""
+                            if datePart contains "${CURRENT_DATE}" then
+                                set timePart to text 12 thru 16 of datePart
+                                set currentTimeShort to text 1 thru 5 of "${CURRENT_TIME}"
+                                if timePart is currentTimeShort then
+                                    set isDuplicate to true
                                 end if
-                            end repeat
-                        else
-                            set contentWithoutTitle to ""
+                            end if
                         end if
                     end if
                 end if
-            end if
-        end if
-        
-        -- If no title exists and body is empty, add title
-        if noteTitle is "" and currentBody is "" then
-            set noteTitle to "${NOTE_NAME}" & lineBreak & lineBreak
-        end if
-        
-        -- Check for duplicate (compare with last entry from content without title)
-        set lastEntryText to ""
-        set lastEntryDate to ""
-        if contentWithoutTitle is not "" then
-            try
-                set AppleScript's text item delimiters to return
-                set contentLines to text items of contentWithoutTitle
-                set AppleScript's text item delimiters to ""
-                
-                if (count of contentLines) > 1 then
-                    set lastEntryText to item 2 of contentLines
-                    set firstLine to item 1 of contentLines
-                    if firstLine contains "[" and firstLine contains "]" then
-                        set AppleScript's text item delimiters to "]"
-                        set datePart to text item 1 of firstLine
-                        set AppleScript's text item delimiters to "["
-                        set datePart to text item 2 of datePart
-                        set AppleScript's text item delimiters to ""
-                        set lastEntryDate to datePart
-                    end if
-                end if
             end try
-        end if
-        
-        -- Check if this is a duplicate
-        set isDuplicate to false
-        if lastEntryText is newTextContent then
-            if lastEntryDate contains "${CURRENT_DATE}" then
-                set timePart to text 12 thru 16 of lastEntryDate
-                set currentTimeShort to text 1 thru 5 of "${CURRENT_TIME}"
-                if timePart is currentTimeShort then
-                    set isDuplicate to true
-                end if
-            end if
         end if
         
         if isDuplicate then
             return
         end if
         
-        -- Prepare new content with proper formatting
-        set lineBreak to return
-        set newContent to "[${TIMESTAMP}]" & lineBreak & newTextContent & lineBreak & lineBreak
-        
         -- Check if we need a day separator
         set needsDaySeparator to false
-        if contentWithoutTitle is "" then
+        if currentBody is "" then
             set needsDaySeparator to true
         else
-            -- Check if last entry was from a different day
-            if lastEntryDate is not "" then
-                set lastDate to text 1 thru 10 of lastEntryDate
-                if lastDate is not "${CURRENT_DATE}" then
-                    set needsDaySeparator to true
-                end if
-            end if
+            try
+                set AppleScript's text item delimiters to return
+                set bodyLines to text items of currentBody
+                set AppleScript's text item delimiters to ""
+                -- Find first timestamp entry
+                repeat with aLine in bodyLines
+                    if aLine contains "[" and aLine contains "]" then
+                        set AppleScript's text item delimiters to "]"
+                        set datePart to text item 1 of aLine
+                        set AppleScript's text item delimiters to "["
+                        set datePart to text item 2 of datePart
+                        set AppleScript's text item delimiters to ""
+                        set lastDate to text 1 thru 10 of datePart
+                        if lastDate is not "${CURRENT_DATE}" then
+                            set needsDaySeparator to true
+                        end if
+                        exit repeat
+                    end if
+                end repeat
+            end try
         end if
         
-        -- Build the new body (title at top, then new content, then existing content)
+        -- Build new content
+        set newContent to "[${TIMESTAMP}]" & return & newTextContent & return & return
+        
         if needsDaySeparator then
-            -- Day separator with proper spacing
-            set lineBreak to return
-            set daySeparator to lineBreak & lineBreak & "═══════════════════════════════════════" & lineBreak & "  ${CURRENT_DATE}" & lineBreak & "═══════════════════════════════════════" & lineBreak & lineBreak
-            -- Add spacing between new content and separator if there's existing content
-            if contentWithoutTitle is not "" then
-                -- Trim leading newlines from existing content to avoid double spacing
-                set trimmedContent to contentWithoutTitle
-                try
-                    repeat while (length of trimmedContent > 0) and (character 1 of trimmedContent is return)
-                        set trimmedContent to text 2 thru -1 of trimmedContent
-                    end repeat
-                end try
-                set newBody to noteTitle & newContent & daySeparator & trimmedContent
-            else
-                -- First entry, no need for extra spacing
-                set newBody to noteTitle & newContent
-            end if
-        else
-            -- No day separator needed, just add new content with proper spacing
-            if contentWithoutTitle is not "" then
-                -- Trim leading newlines from existing content to avoid double spacing
-                set trimmedContent to contentWithoutTitle
-                try
-                    repeat while (length of trimmedContent > 0) and (character 1 of trimmedContent is return)
-                        set trimmedContent to text 2 thru -1 of trimmedContent
-                    end repeat
-                end try
-                set newBody to noteTitle & newContent & trimmedContent
-            else
-                set newBody to noteTitle & newContent
-            end if
+            set daySeparator to return & return & "═══════════════════════════════════════" & return & "  ${CURRENT_DATE}" & return & "═══════════════════════════════════════" & return & return
+            set newContent to daySeparator & newContent
         end if
         
-        -- Update the note
-        -- Ensure newlines are preserved by explicitly setting the body
-        -- Apple Notes may reformat, so we set it directly
-        set body of targetNote to newBody as string
+        -- Check if note has title (first line is title, not timestamp)
+        set hasTitle to false
+        set noteTitle to ""
+        if currentBody is not "" then
+            try
+                set AppleScript's text item delimiters to return
+                set bodyLines to text items of currentBody
+                set AppleScript's text item delimiters to ""
+                if (count of bodyLines) > 0 then
+                    set firstLine to item 1 of bodyLines
+                    if firstLine does not contain "[" and (firstLine is "${NOTE_NAME}" or firstLine contains "${NOTE_NAME}") then
+                        set hasTitle to true
+                        set noteTitle to firstLine & return & return
+                    end if
+                end if
+            end try
+        end if
+        
+        -- Prepend new content
+        if hasTitle then
+            -- Keep title, prepend new content after it
+            set body of targetNote to noteTitle & newContent & currentBody
+        else if currentBody is "" then
+            -- Empty note, add title and content
+            set body of targetNote to "${NOTE_NAME}" & return & return & newContent
+        else
+            -- No title, just prepend
+            set body of targetNote to newContent & currentBody
+        end if
         
         -- Show notification
         display notification "Saved to ${NOTE_NAME}!" with title "Scribbledown" sound name "Glass"
