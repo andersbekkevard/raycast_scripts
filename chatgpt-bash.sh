@@ -2,7 +2,7 @@
 
 # Required parameters:
 # @raycast.schemaVersion 1
-# @raycast.title ChatGPT Toggle (Bash)
+# @raycast.title ChatGPT Toggle 
 # @raycast.mode silent
 
 # Optional parameters:
