@@ -5,7 +5,7 @@
     "icon": "🤖",
     "url_patterns": ["chat.openai.com", "chatgpt.com"],
     "default_url": "https://chatgpt.com",
-    "use_history": false
+    "use_history": true
   },
   {
     "name": "bb",
@@ -93,7 +93,7 @@
     "icon": "📈",
     "url_patterns": ["borsdata.se"],
     "default_url": "https://borsdata.se",
-    "use_history": false
+    "use_history": true
   }
 ]
 
