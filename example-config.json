@@ -1,0 +1,49 @@
+[
+	{
+		"name": "example-web-history",
+		"title": "Example Web App (with History)",
+		"icon": "🌐",
+		"url_patterns": [
+			"example.com",
+			"www.example.com"
+		],
+		"default_url": "https://www.example.com",
+		"use_history": true,
+		"description": "Example configuration for a web app with browser history lookup enabled. The script will find the most recently visited matching URL from browser history, or fall back to the default_url if none found."
+	},
+	{
+		"name": "example-web-hardcoded",
+		"title": "Example Web App (Hardcoded)",
+		"icon": "🔗",
+		"url_patterns": [
+			"app.example.com"
+		],
+		"default_url": "https://app.example.com/dashboard",
+		"use_history": false,
+		"description": "Example configuration for a web app with a hardcoded URL. The script will always open the default_url, ignoring browser history."
+	},
+	{
+		"name": "example-local-file",
+		"title": "Example Local PDF",
+		"icon": "📄",
+		"url_patterns": [
+			"example-document.pdf"
+		],
+		"default_url": "file:///Users/username/Documents/example-document.pdf",
+		"use_history": false,
+		"description": "Example configuration for opening a local PDF file. Use URL-encoded paths for spaces and special characters (e.g., %20 for spaces)."
+	},
+	{
+		"name": "example-multi-domain",
+		"title": "Example Multi-Domain",
+		"icon": "🔍",
+		"url_patterns": [
+			"service1.com",
+			"service2.com",
+			"service3.com"
+		],
+		"default_url": "https://service1.com",
+		"use_history": true,
+		"description": "Example configuration matching multiple domains. Useful when a service uses multiple domains or subdomains."
+	}
+]

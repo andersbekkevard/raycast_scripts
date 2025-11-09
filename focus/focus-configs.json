@@ -94,6 +94,38 @@
     "url_patterns": ["borsdata.se"],
     "default_url": "https://borsdata.se",
     "use_history": true
+  },
+  {
+    "name": "bok-algdat",
+    "title": "Bok AlgDat Focus",
+    "icon": "📖",
+    "url_patterns": ["AlgDat-Pensumbok.pdf"],
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/AlgDat-Pensumbok.pdf",
+    "use_history": false
+  },
+  {
+    "name": "bok-datamaskiner",
+    "title": "Bok Datamaskiner Focus",
+    "icon": "📖",
+    "url_patterns": ["Datamaskiner-Pensumbok.pdf"],
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/Datamaskiner-Pensumbok.pdf",
+    "use_history": false
+  },
+  {
+    "name": "formelark-fysikk",
+    "title": "Formelark Fysikk Focus",
+    "icon": "📄",
+    "url_patterns": ["Formelark%20Fysikk"],
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/Fag/Fysikk/Formelark%20Fysikk.pdf",
+    "use_history": false
+  },
+  {
+    "name": "bok-matte-4",
+    "title": "Bok Matte 4 Focus",
+    "icon": "📖",
+    "url_patterns": ["Matte%204D-Pensumbok"],
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/Matte%204D-Pensumbok.pdf",
+    "use_history": false
   }
 ]
 
