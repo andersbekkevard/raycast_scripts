@@ -10,7 +10,7 @@
 
 # Documentation:
 # @raycast.author Anders Bekkevard
-# @raycast.description Saves selected text to scribbledown file without affecting clipboard
+# @raycast.description Saves clipboard content to scribbledown file
 
 # Configuration
 SCRIBBLE_FILE="$HOME/Desktop/Scribbledown/scribbledown.md"
@@ -38,98 +38,39 @@ fi
 
 echo "$CURRENT_TIMESTAMP" > "$TIMESTAMP_FILE"
 
-# Get text from clipboard
+# Get clipboard content
 TEXT_CONTENT=$(osascript 2>/dev/null <<'APPLESCRIPT_END'
-on isNonTextData()
-    try
-        set clipInfo to (clipboard info) as string
-        if clipInfo contains "PNGf" or clipInfo contains "TIFF" or clipInfo contains "JPEG" or clipInfo contains "GIFf" then
-            return true
-        end if
-        if clipInfo contains "public.png" or clipInfo contains "public.tiff" or clipInfo contains "public.jpeg" then
-            return true
-        end if
-        if clipInfo contains "furl" or clipInfo contains "public.file-url" then
-            return true
-        end if
-    end try
-    return false
-end isNonTextData
-
 try
-    set savedClip to ""
-    set hasClip to false
+    set clipInfo to (clipboard info) as string
     
-    try
-        set savedClip to the clipboard as text
-        if savedClip is not "" and savedClip is not missing value then
-            set hasClip to true
-        end if
-    end try
-    
-    if isNonTextData() then
+    -- Check for binary/image data
+    if clipInfo contains "PNGf" or clipInfo contains "TIFF" or clipInfo contains "JPEG" or clipInfo contains "GIFf" then
+        return "BINARY_DATA"
+    end if
+    if clipInfo contains "public.png" or clipInfo contains "public.tiff" or clipInfo contains "public.jpeg" then
+        return "BINARY_DATA"
+    end if
+    if clipInfo contains "furl" or clipInfo contains "public.file-url" then
         return "BINARY_DATA"
     end if
     
-    try
-        tell application "System Events"
-            keystroke "c" using command down
-        end tell
-        delay 0.15
-    on error
-    end try
+    -- Get clipboard as text
+    set clipText to the clipboard as text
     
-    if isNonTextData() then
-        if hasClip then
-            try
-                set the clipboard to savedClip
-            end try
-        end if
-        return "BINARY_DATA"
-    end if
-    
-    set newClip to ""
-    try
-        set newClip to the clipboard as text
-    on error
-        if hasClip then
-            try
-                set the clipboard to savedClip
-            end try
-        end if
-        return "BINARY_DATA"
-    end try
-    
-    if newClip is "" or newClip is missing value then
-        if hasClip then
-            try
-                set the clipboard to savedClip
-            end try
-        end if
+    if clipText is "" or clipText is missing value then
         return "NO_TEXT"
     end if
     
-    set textLen to length of newClip
+    -- Check if suspiciously long (might be binary coerced to text)
+    set textLen to length of clipText
     if textLen > 10000 then
-        set sample to text 1 thru 500 of newClip
+        set sample to text 1 thru 500 of clipText
         if sample contains "data" or sample contains "class" then
-            if hasClip then
-                try
-                    set the clipboard to savedClip
-                end try
-            end if
             return "BINARY_DATA"
         end if
     end if
     
-    if hasClip and newClip is not equal to savedClip then
-        try
-            set the clipboard to savedClip
-        end try
-        return newClip
-    else
-        return newClip
-    end if
+    return clipText
 on error errMsg
     return "ERROR:" & errMsg
 end try
@@ -142,6 +83,11 @@ if [[ "$TEXT_CONTENT" == "BINARY_DATA" ]] || [[ "$TEXT_CONTENT" == "NO_TEXT" ]] 
 fi
 
 if [[ "$TEXT_CONTENT" == ERROR:* ]]; then
+    exit 0
+fi
+
+# Don't save if content is only whitespace
+if [[ -z "${TEXT_CONTENT// }" ]]; then
     exit 0
 fi
 
@@ -188,9 +134,11 @@ fi
 TEMP_FILE=$(mktemp)
 
 if [ -f "$SCRIBBLE_FILE" ]; then
-    FIRST_LINE=$(head -n 1 "$SCRIBBLE_FILE" 2>/dev/null)
-    LAST_ENTRY_DATE=$(echo "$FIRST_LINE" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | head -n 1)
-    if [ "$LAST_ENTRY_DATE" != "$CURRENT_DATE" ]; then
+    # Find the most recent timestamp (first one in file)
+    LAST_ENTRY_DATE=$(grep -m 1 "^\[20" "$SCRIBBLE_FILE" 2>/dev/null | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | head -n 1)
+    
+    # Only add day separator if this is a different day than the last entry
+    if [ -n "$LAST_ENTRY_DATE" ] && [ "$LAST_ENTRY_DATE" != "$CURRENT_DATE" ]; then
         echo "" >> "$TEMP_FILE"
         echo "═══════════════════════════════════════════════════════════════════" >> "$TEMP_FILE"
         echo "  $CURRENT_DATE" >> "$TEMP_FILE"
