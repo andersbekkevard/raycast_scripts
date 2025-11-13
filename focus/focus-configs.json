@@ -16,6 +16,14 @@
     "use_history": true
   },
   {
+    "name": "bb-cdn",
+    "title": "Blackboard CDN Focus",
+    "icon": "📄",
+    "url_patterns": ["blackboardcdn.com"],
+    "default_url": "https://blackboardcdn.com",
+    "use_history": true
+  },
+  {
     "name": "messenger",
     "title": "Messenger Focus",
     "icon": "💬",
