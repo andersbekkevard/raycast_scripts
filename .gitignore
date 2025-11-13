@@ -43,4 +43,5 @@ vendor/bundle/
 
 # Raycast
 .raycast/
+focus-configs.json
 
