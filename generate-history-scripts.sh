@@ -216,7 +216,7 @@ generate_script() {
         make_tab_url_prop="{URL:\"${escaped_default_url}\"}"
     fi
     
-    cat > "${name}-focus.sh" <<EOF
+    cat > "focus/${name}-focus.sh" <<EOF
 #!/bin/bash
 
 # Required parameters:
@@ -233,18 +233,18 @@ EOF
     
     # Add history function code only if use_history is true
     if [ "$use_history" = "true" ]; then
-        cat >> "${name}-focus.sh" <<EOF
+        cat >> "focus/${name}-focus.sh" <<EOF
 
 ${url_retrieval_code}
 EOF
     else
         # Add blank line to match old generator format
-        cat >> "${name}-focus.sh" <<EOF
+        cat >> "focus/${name}-focus.sh" <<EOF
 
 EOF
     fi
     
-    cat >> "${name}-focus.sh" <<EOF
+    cat >> "focus/${name}-focus.sh" <<EOF
 # Check if Comet is already running
 if pgrep -x "Comet" > /dev/null; then
     # Comet is running, focus ${title} tab or open new tab
@@ -254,12 +254,12 @@ EOF
     
     # Add targetURL variable only if use_history is true
     if [ "$use_history" = "true" ]; then
-        cat >> "${name}-focus.sh" <<EOF
+        cat >> "focus/${name}-focus.sh" <<EOF
     ${applescript_url_var}
 EOF
     fi
     
-    cat >> "${name}-focus.sh" <<EOF
+    cat >> "focus/${name}-focus.sh" <<EOF
     set targetWindowIndex to -1
     set targetTabIndex to -1
     set foundTab to false
@@ -360,12 +360,12 @@ EOF
     
     # Add targetURL variable only if use_history is true
     if [ "$use_history" = "true" ]; then
-        cat >> "${name}-focus.sh" <<EOF
+        cat >> "focus/${name}-focus.sh" <<EOF
     ${applescript_url_var}
 EOF
     fi
     
-    cat >> "${name}-focus.sh" <<EOF
+    cat >> "focus/${name}-focus.sh" <<EOF
     -- Launch Comet without opening a specific URL (so it restores previous tabs)
     activate
     
@@ -490,8 +490,8 @@ APPLESCRIPT_EOF
 fi
 EOF
     
-    chmod +x "${name}-focus.sh"
-    echo "Generated ${name}-focus.sh (use_history: ${use_history})"
+    chmod +x "focus/${name}-focus.sh"
+    echo "Generated focus/${name}-focus.sh (use_history: ${use_history})"
 }
 
 # Generate all scripts
