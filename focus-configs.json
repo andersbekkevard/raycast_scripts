@@ -112,6 +112,14 @@
     "use_history": false
   },
   {
+    "name": "pensumhefte-algdat",
+    "title": "Pensumhefte AlgDat Focus",
+    "icon": "📖",
+    "url_patterns": ["pensumhefte.pdf"],
+    "default_url": "file:///Users/andersbekkevard/Desktop/pensumhefte.pdf",
+    "use_history": false
+  },
+  {
     "name": "bok-datamaskiner",
     "title": "Bok Datamaskiner Focus",
     "icon": "📖",
@@ -125,6 +133,14 @@
     "icon": "📄",
     "url_patterns": ["Formelark%20Fysikk"],
     "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/Fag/Fysikk/Formelark%20Fysikk.pdf",
+    "use_history": false
+  },
+  {
+    "name": "RISC-V Reference Card",
+    "title": "RISC-V Reference Card Focus",
+    "icon": "📄",
+    "url_patterns": ["RISC-V-Reference"],
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/Fag/Datamaskiner/RISC-V-Reference.pdf",
     "use_history": false
   },
   {

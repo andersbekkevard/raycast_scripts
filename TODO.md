@@ -30,3 +30,34 @@ on run argv
 		end if
 	end tell
 end run
+
+
+# Clipboard related
+Great question! Here are some useful clipboard transformations you might find handy:
+
+**Text Cleanup:**
+- **Remove extra whitespace** - Collapse multiple spaces/tabs into single spaces
+- **Trim whitespace** - Strip leading/trailing spaces from each line
+- **Remove empty lines** - Clean up text with lots of blank lines
+- **Smart quotes → straight quotes** - Fix curly quotes from Word/Pages (`"` → `"`)
+
+**Case Conversion:**
+- **UPPERCASE / lowercase / Title Case** - Quick text case changes
+- **Slugify** - Convert to URL-friendly format (`My Title` → `my-title`)
+
+**Developer Tools:**
+- **JSON prettify / minify** - Format or compress JSON
+- **URL encode / decode** - Handle special characters in URLs
+- **Base64 encode / decode** - Quick encoding
+- **Escape HTML** - Convert `<` to `&lt;` etc.
+- **Sort lines** - Alphabetically sort clipboard lines
+- **Remove duplicate lines** - Dedupe a list
+
+**Extraction:**
+- **Extract URLs** - Pull all URLs from text
+- **Extract emails** - Pull all email addresses from text
+
+**Stats:**
+- **Word/character count** - Quick clipboard stats (show in notification)
+
+Would you like me to create any of these? I can make a few that seem most useful to you, or create a whole set if you want a clipboard toolkit.
