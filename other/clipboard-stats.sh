@@ -12,11 +12,11 @@
 # @raycast.author Anders Bekkevard
 # @raycast.description Shows word, character, and line count for clipboard
 
-clipboard=$(pbpaste)
-
-chars=$(echo -n "$clipboard" | wc -c | tr -d ' ')
-words=$(echo -n "$clipboard" | wc -w | tr -d ' ')
-lines=$(echo -n "$clipboard" | wc -l | tr -d ' ')
+# Stream directly to wc - handles large clipboards without hitting arg limits
+stats=$(pbpaste | wc)
+lines=$(echo $stats | awk '{print $1}')
+words=$(echo $stats | awk '{print $2}')
+chars=$(echo $stats | awk '{print $3}')
 
 echo "${words} words · ${chars} chars · ${lines} lines"
 
