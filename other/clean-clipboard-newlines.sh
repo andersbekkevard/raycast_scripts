@@ -11,9 +11,8 @@
 # Documentation:
 # @raycast.author Anders Bekkevard
 # @raycast.description Replaces newlines in clipboard with spaces (useful for PDF text)
-
-# Get clipboard, replace newlines with spaces, put back on clipboard
-pbpaste | tr '\n' ' ' | pbcopy
+# Get clipboard, replace all whitespace with single spaces, put back on clipboard
+pbpaste | tr -s '[:space:]' ' ' | pbcopy
 
 echo "Clipboard cleaned"
 
