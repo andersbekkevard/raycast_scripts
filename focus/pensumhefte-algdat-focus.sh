@@ -100,7 +100,7 @@ tell application "Comet"
         end if
         set frontWindow to window 1
         set tabCount to count of tabs of frontWindow
-        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"file:///Users/andersbekkevard/Desktop/pensumhefte.pdf"}
+        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"file:///Users/andersbekkevard/dev/python/school/exam_aid/sources/pensumhefte.pdf"}
         set active tab index of frontWindow to (tabCount + 1)
     else
         -- Current tab matches but no other matching tab found, just activate (stay on current)
@@ -226,7 +226,7 @@ tell application "Comet"
         end if
         set frontWindow to window 1
         set tabCount to count of tabs of frontWindow
-        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"file:///Users/andersbekkevard/Desktop/pensumhefte.pdf"}
+        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"file:///Users/andersbekkevard/dev/python/school/exam_aid/sources/pensumhefte.pdf"}
         set active tab index of frontWindow to (tabCount + 1)
     else
         -- Current tab matches but no other matching tab found, just stay on current

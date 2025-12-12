@@ -116,7 +116,7 @@
     "title": "Pensumhefte AlgDat Focus",
     "icon": "📖",
     "url_patterns": ["pensumhefte.pdf"],
-    "default_url": "file:///Users/andersbekkevard/Desktop/pensumhefte.pdf",
+    "default_url": "file:///Users/andersbekkevard/dev/python/school/exam_aid/sources/pensumhefte.pdf",
     "use_history": false
   },
   {
