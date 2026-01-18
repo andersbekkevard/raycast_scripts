@@ -2,7 +2,7 @@
 
 # Required parameters:
 # @raycast.schemaVersion 1
-# @raycast.title Gemini Toggle 
+# @raycast.title Gemini Toggle
 # @raycast.mode silent
 
 # Optional parameters:
@@ -11,77 +11,115 @@
 # Documentation:
 # @raycast.author Anders Bekkevard
 
+STATE_FILE="$HOME/.cache/raycast-gemini-toggle-state"
+mkdir -p "$(dirname "$STATE_FILE")"
+
+# Function to maximize Comet window 1 to fill the screen
+maximize_window() {
+    osascript <<'MAXEOF'
+tell application "Finder"
+    set screenBounds to bounds of window of desktop
+    set screenWidth to item 3 of screenBounds
+    set screenHeight to item 4 of screenBounds
+end tell
+tell application "Comet"
+    if (count of windows) > 0 then
+        set bounds of window 1 to {0, 25, screenWidth, screenHeight}
+    end if
+end tell
+MAXEOF
+}
+
+# Get the frontmost app using lsappinfo (avoids System Events permissions)
+FRONTMOST_APP=$(lsappinfo info -only name "$(lsappinfo front)" 2>/dev/null | cut -d'"' -f4)
+
 # Check if Comet is already running
 if pgrep -x "Comet" > /dev/null; then
-    # Comet is running, toggle Gemini window
-    osascript <<'EOF'
-tell application "System Events"
-    set cometIsFrontmost to (name of first application process whose frontmost is true) is "Comet"
-end tell
-
+    # Get current state: is Gemini the frontmost window?
+    GEMINI_IS_FRONT=$(osascript <<'EOF'
 tell application "Comet"
-    set geminiWindow to missing value
+    if (count of windows) is 0 then return "no"
+    try
+        set tabURL to URL of active tab of window 1
+        if tabURL contains "gemini.google.com" then return "yes"
+    end try
+    set windowTitle to name of window 1
+    if windowTitle contains "Gemini" or windowTitle contains "gemini" then return "yes"
+end tell
+return "no"
+EOF
+)
+
+    if [ "$FRONTMOST_APP" = "Comet" ] && [ "$GEMINI_IS_FRONT" = "yes" ]; then
+        # Gemini is focused - toggle OFF: restore previous state
+        if [ -f "$STATE_FILE" ]; then
+            PREV_APP=$(cat "$STATE_FILE")
+            rm "$STATE_FILE"
+            if [ "$PREV_APP" = "Comet" ]; then
+                # Previous was another Comet window - bring window 2 to front
+                osascript -e 'tell application "Comet" to if (count of windows) > 1 then set index of window 2 to 1'
+            else
+                # Previous was a different app - activate it
+                osascript -e "tell application \"$PREV_APP\" to activate"
+            fi
+        else
+            # No saved state - just bring next window or do nothing
+            osascript -e 'tell application "Comet" to if (count of windows) > 1 then set index of window 2 to 1'
+        fi
+    else
+        # Gemini not focused - toggle ON: save current state and focus Gemini
+        echo "$FRONTMOST_APP" > "$STATE_FILE"
+
+        RESULT=$(osascript <<'EOF'
+tell application "Comet"
     set geminiIndex to -1
     set windowCount to count of windows
-    
-    -- Find the Gemini window by checking the active tab's URL
-    -- This works even when the window title changes
+
     repeat with i from 1 to windowCount
         set w to window i
         set isGeminiWindow to false
-        
-        -- Check the active tab's URL (most reliable method)
+
         try
             set tabURL to URL of active tab of w
             if tabURL contains "gemini.google.com" then
                 set isGeminiWindow to true
             end if
         end try
-        
-        -- Fallback: Check window title for Gemini indicators (for initial load)
+
         if not isGeminiWindow then
             set windowTitle to name of w
-            if windowTitle contains "Gemini" or windowTitle contains "gemini.google.com" then
+            if windowTitle contains "Gemini" or windowTitle contains "gemini" or windowTitle contains "gemini.google.com" then
                 set isGeminiWindow to true
             end if
         end if
-        
+
         if isGeminiWindow then
-            set geminiWindow to w
             set geminiIndex to i
             exit repeat
         end if
     end repeat
-    
+
     if geminiIndex is -1 then
-        -- No Gemini window found, create one
         do shell script "/Applications/Comet.app/Contents/MacOS/Comet --app='https://gemini.google.com/' &> /dev/null &"
-    else if cometIsFrontmost and geminiIndex is 1 then
-        -- Gemini is in focus, toggle it off
-        if windowCount > 1 then
-            -- Multiple windows: bring next window to front
-            set nextWindowIndex to geminiIndex + 1
-            if nextWindowIndex > windowCount then
-                set nextWindowIndex to 1
-            end if
-            
-            if nextWindowIndex is not geminiIndex then
-                set index of window nextWindowIndex to 1
-            end if
-        else
-            -- Only Gemini window: hide the app
-            tell application "System Events"
-                set visible of process "Comet" to false
-            end tell
-        end if
+        return "new"
     else
-        -- Gemini exists but not in focus, bring it to front
         activate
-        set index of geminiWindow to 1
+        set index of window geminiIndex to 1
+        return "existing"
     end if
 end tell
 EOF
+)
+        if [ "$RESULT" = "new" ]; then
+            # Wait for new window to appear, then maximize
+            sleep 0.2
+        fi
+        maximize_window
+    fi
 else
-    # Comet is not running, launch it
+    # Comet is not running - save current app and launch Gemini
+    echo "$FRONTMOST_APP" > "$STATE_FILE"
     /Applications/Comet.app/Contents/MacOS/Comet --app="https://gemini.google.com/" &
+    sleep 0.4
+    maximize_window
 fi
