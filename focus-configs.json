@@ -3,7 +3,10 @@
     "name": "chatgpt",
     "title": "ChatGPT Focus",
     "icon": "🤖",
-    "url_patterns": ["chat.openai.com", "chatgpt.com"],
+    "url_patterns": [
+      "chat.openai.com",
+      "chatgpt.com"
+    ],
     "default_url": "https://chatgpt.com",
     "use_history": true
   },
@@ -11,7 +14,10 @@
     "name": "bb",
     "title": "Blackboard Focus",
     "icon": "📚",
-    "url_patterns": ["blackboard.com", "ntnu.blackboard.com"],
+    "url_patterns": [
+      "blackboard.com",
+      "ntnu.blackboard.com"
+    ],
     "default_url": "https://ntnu.blackboard.com",
     "use_history": true
   },
@@ -19,7 +25,9 @@
     "name": "bb-cdn",
     "title": "Blackboard CDN Focus",
     "icon": "📄",
-    "url_patterns": ["blackboardcdn.com"],
+    "url_patterns": [
+      "blackboardcdn.com"
+    ],
     "default_url": "https://blackboardcdn.com",
     "use_history": true
   },
@@ -27,7 +35,9 @@
     "name": "messenger",
     "title": "Messenger Focus",
     "icon": "💬",
-    "url_patterns": ["messenger.com"],
+    "url_patterns": [
+      "messenger.com"
+    ],
     "default_url": "https://messenger.com",
     "use_history": false
   },
@@ -35,7 +45,9 @@
     "name": "meet",
     "title": "Google Meet Focus",
     "icon": "📹",
-    "url_patterns": ["meet.google.com"],
+    "url_patterns": [
+      "meet.google.com"
+    ],
     "default_url": "https://meet.google.com",
     "use_history": true
   },
@@ -43,7 +55,10 @@
     "name": "toggl",
     "title": "Toggl Focus",
     "icon": "⏱️",
-    "url_patterns": ["track.toggl.com", "toggl.com"],
+    "url_patterns": [
+      "track.toggl.com",
+      "toggl.com"
+    ],
     "default_url": "https://track.toggl.com/timer",
     "use_history": false
   },
@@ -51,7 +66,10 @@
     "name": "todoist",
     "title": "Todoist Focus",
     "icon": "✅",
-    "url_patterns": ["app.todoist.com", "todoist.com"],
+    "url_patterns": [
+      "app.todoist.com",
+      "todoist.com"
+    ],
     "default_url": "https://app.todoist.com/app/project/studie-6RWxW3r5GcXRrr8v",
     "use_history": true
   },
@@ -59,7 +77,10 @@
     "name": "youtube",
     "title": "YouTube Focus",
     "icon": "📺",
-    "url_patterns": ["youtube.com", "www.youtube.com"],
+    "url_patterns": [
+      "youtube.com",
+      "www.youtube.com"
+    ],
     "default_url": "https://www.youtube.com/",
     "use_history": true
   },
@@ -67,7 +88,9 @@
     "name": "calendar",
     "title": "Google Calendar Focus",
     "icon": "📅",
-    "url_patterns": ["calendar.google.com"],
+    "url_patterns": [
+      "calendar.google.com"
+    ],
     "default_url": "https://calendar.google.com/calendar/u/0/r",
     "use_history": false
   },
@@ -75,7 +98,10 @@
     "name": "gmail",
     "title": "Gmail Focus",
     "icon": "📧",
-    "url_patterns": ["mail.google.com", "gmail.com"],
+    "url_patterns": [
+      "mail.google.com",
+      "gmail.com"
+    ],
     "default_url": "https://mail.google.com/mail/u/0/#inbox",
     "use_history": true
   },
@@ -83,7 +109,9 @@
     "name": "panopto",
     "title": "Panopto Focus",
     "icon": "🎥",
-    "url_patterns": ["panopto.eu"],
+    "url_patterns": [
+      "panopto.eu"
+    ],
     "default_url": "https://ntnu.cloud.panopto.eu/",
     "use_history": true
   },
@@ -91,7 +119,9 @@
     "name": "github",
     "title": "GitHub Focus",
     "icon": "🐙",
-    "url_patterns": ["github.com"],
+    "url_patterns": [
+      "github.com"
+    ],
     "default_url": "https://github.com",
     "use_history": true
   },
@@ -99,57 +129,70 @@
     "name": "borsdata",
     "title": "Börsdata Focus",
     "icon": "📈",
-    "url_patterns": ["borsdata.se"],
+    "url_patterns": [
+      "borsdata.se"
+    ],
     "default_url": "https://borsdata.se",
     "use_history": true
-  },
-  {
-    "name": "bok-algdat",
-    "title": "Bok AlgDat Focus",
-    "icon": "📖",
-    "url_patterns": ["AlgDat-Pensumbok.pdf"],
-    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/AlgDat-Pensumbok.pdf",
-    "use_history": false
-  },
-  {
-    "name": "pensumhefte-algdat",
-    "title": "Pensumhefte AlgDat Focus",
-    "icon": "📖",
-    "url_patterns": ["pensumhefte.pdf"],
-    "default_url": "file:///Users/andersbekkevard/dev/python/school/exam_aid/sources/pensumhefte.pdf",
-    "use_history": false
-  },
-  {
-    "name": "bok-datamaskiner",
-    "title": "Bok Datamaskiner Focus",
-    "icon": "📖",
-    "url_patterns": ["Datamaskiner-Pensumbok.pdf"],
-    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/Datamaskiner-Pensumbok.pdf",
-    "use_history": false
-  },
-  {
-    "name": "formelark-fysikk",
-    "title": "Formelark Fysikk Focus",
-    "icon": "📄",
-    "url_patterns": ["Formelark%20Fysikk"],
-    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/Fag/Fysikk/Formelark%20Fysikk.pdf",
-    "use_history": false
-  },
-  {
-    "name": "RISC-V Reference Card",
-    "title": "RISC-V Reference Card Focus",
-    "icon": "📄",
-    "url_patterns": ["RISC-V-Reference"],
-    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/Fag/Datamaskiner/RISC-V-Reference.pdf",
-    "use_history": false
   },
   {
     "name": "bok-matte-4",
     "title": "Bok Matte 4 Focus",
     "icon": "📖",
-    "url_patterns": ["Matte%204D-Pensumbok"],
+    "url_patterns": [
+      "Matte%204D-Pensumbok"
+    ],
     "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/Matte%204D-Pensumbok.pdf",
+    "use_history": false
+  },
+  {
+    "name": "bok-databaser",
+    "title": "Bok Databaser Focus",
+    "icon": "📖",
+    "url_patterns": [
+      "Databaser%20pensumbok.pdf"
+    ],
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/Databaser%20pensumbok.pdf",
+    "use_history": false
+  },
+  {
+    "name": "bok-ekaterina-kochmar",
+    "title": "Bok Ekaterina Kochmar Focus",
+    "icon": "📖",
+    "url_patterns": [
+      "Getting%20Started%20with%20Natural%20Language%20Processing.pdf"
+    ],
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/Getting%20Started%20with%20Natural%20Language%20Processing.pdf",
+    "use_history": false
+  },
+  {
+    "name": "bok-ktn",
+    "title": "Bok KTN Focus",
+    "icon": "📖",
+    "url_patterns": [
+      "KTN%20Pensumbok.pdf"
+    ],
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/KTN%20Pensumbok.pdf",
+    "use_history": false
+  },
+  {
+    "name": "bok-laering",
+    "title": "Bok Læring Focus",
+    "icon": "📖",
+    "url_patterns": [
+      "L%C3%A6ring%20pensumbok.pdf"
+    ],
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/L%C3%A6ring%20pensumbok.pdf",
+    "use_history": false
+  },
+  {
+    "name": "bok-nlp-python",
+    "title": "Bok NLP Python Focus",
+    "icon": "📖",
+    "url_patterns": [
+      "Natural%20Language%20Processing%20with%20Python.pdf"
+    ],
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/Natural%20Language%20Processing%20with%20Python.pdf",
     "use_history": false
   }
 ]
-
