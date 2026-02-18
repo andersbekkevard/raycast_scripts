@@ -2,20 +2,61 @@
 
 # Required parameters:
 # @raycast.schemaVersion 1
-# @raycast.title Gmail Focus
+# @raycast.title Claude Focus
 # @raycast.mode silent
 
 # Optional parameters:
-# @raycast.icon 📧
+# @raycast.icon 🤖
 
 # Documentation:
 # @raycast.author Anders Bekkevard
 
+# Function to get most recent URL from Comet history
+get_most_recent_url() {
+    local history_db="$HOME/Library/Application Support/Comet/Default/History"
+    local temp_history="/tmp/comet_history_temp_$$.db"
+    
+    # Check if history database exists
+    if [ ! -f "$history_db" ]; then
+        echo "https://claude.ai"
+        return
+    fi
+    
+    # Copy history DB to avoid lock issues (browser may have it locked)
+    if ! cp "$history_db" "$temp_history" 2>/dev/null; then
+        echo "https://claude.ai"
+        return
+    fi
+    
+    # Query for most recent matching URL
+    # Filter out common non-content pages
+    local most_recent_url
+    most_recent_url=$(sqlite3 "$temp_history"         "SELECT url FROM urls 
+         WHERE (url LIKE '%claude.ai%' OR url LIKE '%clau.de%')
+         AND url NOT LIKE '%/Pages/Auth/Login.aspx%'
+         AND url NOT LIKE '%/Pages/Auth/Logout.aspx%'
+         ORDER BY last_visit_time DESC 
+         LIMIT 1;" 2>/dev/null)
+    
+    # Clean up temp file
+    rm -f "$temp_history"
+    
+    # Return found URL or default
+    if [ -n "$most_recent_url" ]; then
+        echo "$most_recent_url"
+    else
+        echo "https://claude.ai"
+    fi
+}
+
+# Get the target URL from history
+TARGET_URL=$(get_most_recent_url)
 # Check if Comet is already running
 if pgrep -x "Comet" > /dev/null; then
-    # Comet is running, focus Gmail Focus tab or open new tab
-    osascript <<'APPLESCRIPT_EOF'
+    # Comet is running, focus Claude Focus tab or open new tab
+    osascript <<APPLESCRIPT_EOF
 tell application "Comet"
+    set targetURL to "$TARGET_URL"
     set targetWindowIndex to -1
     set targetTabIndex to -1
     set foundTab to false
@@ -36,7 +77,7 @@ tell application "Comet"
     -- Check if current tab matches the URL pattern
     set currentTabMatches to false
     if currentTabURL is not "" then
-        if currentTabURL contains "mail.google.com" or currentTabURL contains "gmail.com" then
+        if currentTabURL contains "claude.ai" or currentTabURL contains "clau.de" then
             set currentTabMatches to true
             set anyMatchingTabFound to true
         end if
@@ -51,7 +92,7 @@ tell application "Comet"
         repeat with t from 1 to (count of windowTabs)
             try
                 set tabURL to URL of tab t of window w
-                if tabURL contains "mail.google.com" or tabURL contains "gmail.com" then
+                if tabURL contains "claude.ai" or tabURL contains "clau.de" then
                     set end of matchingTabs to {windowIndex:w, tabIndex:t}
                     set anyMatchingTabFound to true
                     -- Check if this is the current tab
@@ -100,7 +141,7 @@ tell application "Comet"
         end if
         set frontWindow to window 1
         set tabCount to count of tabs of frontWindow
-        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"https://mail.google.com/mail/u/0/#inbox"}
+        set newTab to make new tab at end of tabs of frontWindow with properties {URL:targetURL}
         set active tab index of frontWindow to (tabCount + 1)
     else
         -- Current tab matches but no other matching tab found, just activate (stay on current)
@@ -110,8 +151,9 @@ end tell
 APPLESCRIPT_EOF
 else
     # Comet is not running, launch it and wait for tabs to restore, then search
-    osascript <<'APPLESCRIPT_EOF'
+    osascript <<APPLESCRIPT_EOF
 tell application "Comet"
+    set targetURL to "$TARGET_URL"
     -- Launch Comet without opening a specific URL (so it restores previous tabs)
     activate
     
@@ -164,7 +206,7 @@ tell application "Comet"
     -- Check if current tab matches the URL pattern
     set currentTabMatches to false
     if currentTabURL is not "" then
-        if currentTabURL contains "mail.google.com" or currentTabURL contains "gmail.com" then
+        if currentTabURL contains "claude.ai" or currentTabURL contains "clau.de" then
             set currentTabMatches to true
             set anyMatchingTabFound to true
         end if
@@ -179,7 +221,7 @@ tell application "Comet"
         repeat with t from 1 to (count of windowTabs)
             try
                 set tabURL to URL of tab t of window w
-                if tabURL contains "mail.google.com" or tabURL contains "gmail.com" then
+                if tabURL contains "claude.ai" or tabURL contains "clau.de" then
                     set end of matchingTabs to {windowIndex:w, tabIndex:t}
                     set anyMatchingTabFound to true
                     -- Check if this is the current tab
@@ -226,7 +268,7 @@ tell application "Comet"
         end if
         set frontWindow to window 1
         set tabCount to count of tabs of frontWindow
-        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"https://mail.google.com/mail/u/0/#inbox"}
+        set newTab to make new tab at end of tabs of frontWindow with properties {URL:targetURL}
         set active tab index of frontWindow to (tabCount + 1)
     else
         -- Current tab matches but no other matching tab found, just stay on current

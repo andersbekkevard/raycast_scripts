@@ -11,6 +11,17 @@
     "use_history": true
   },
   {
+    "name": "claude",
+    "title": "Claude Focus",
+    "icon": "🤖",
+    "url_patterns": [
+      "claude.ai",
+      "clau.de"
+    ],
+    "default_url": "https://claude.ai",
+    "use_history": true
+  },
+  {
     "name": "bb",
     "title": "Blackboard Focus",
     "icon": "📚",
@@ -103,7 +114,7 @@
       "gmail.com"
     ],
     "default_url": "https://mail.google.com/mail/u/0/#inbox",
-    "use_history": true
+    "use_history": false
   },
   {
     "name": "panopto",
