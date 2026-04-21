@@ -47,9 +47,9 @@
     "title": "Messenger Focus",
     "icon": "💬",
     "url_patterns": [
-      "messenger.com"
+      "facebook.com/messages", "messenger.com"
     ],
-    "default_url": "https://messenger.com",
+    "default_url": "https://facebook.com/messages",
     "use_history": false
   },
   {
@@ -198,6 +198,16 @@
     "use_history": false
   },
   {
+    "name": "pensumhefte-databaser",
+    "title": "Pensumhefte Databaser Focus",
+    "icon": "📖",
+    "url_patterns": [
+      "Databaser%20hefte.pdf"
+    ],
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/Databaser%20hefte.pdf",
+    "use_history": false
+  },
+  {
     "name": "bok-ekaterina-kochmar",
     "title": "Bok Ekaterina Kochmar Focus",
     "icon": "📖",
@@ -245,6 +255,16 @@
       "%advanced-portfolio-management.pdf"
     ],
     "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Quant/advanced-portfolio-management.pdf",
+    "use_history": false
+  },
+  {
+    "name": "toggle-inbox",
+    "title": "Toggle Inbox",
+    "icon": "📥",
+    "url_patterns": [
+      "discord.com/channels/1477629838880931941/1477629953666191360"
+    ],
+    "default_url": "https://discord.com/channels/1477629838880931941/1477629953666191360",
     "use_history": false
   }
 ]

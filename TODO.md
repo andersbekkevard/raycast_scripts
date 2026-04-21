@@ -33,7 +33,6 @@ end run
 
 
 # Clipboard related
-Great question! Here are some useful clipboard transformations you might find handy:
 
 **Text Cleanup:**
 - **Remove extra whitespace** - Collapse multiple spaces/tabs into single spaces
@@ -57,7 +56,6 @@ Great question! Here are some useful clipboard transformations you might find ha
 - **Extract URLs** - Pull all URLs from text
 - **Extract emails** - Pull all email addresses from text
 
-**Stats:**
-- **Word/character count** - Quick clipboard stats (show in notification)
 
-Would you like me to create any of these? I can make a few that seem most useful to you, or create a whole set if you want a clipboard toolkit.
+### Do something with TOGGL.
+https://github.com/raycast/script-commands
