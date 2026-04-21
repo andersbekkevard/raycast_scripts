@@ -131,6 +131,13 @@ body:not(.sidebar-shown) #page-container{left:0!important}
 </style>
 <script id="pdf2html-overlay-js">
 document.addEventListener('DOMContentLoaded',function(){
+  // Kill pdf2htmlEX's own render loop — our IntersectionObserver handles visibility,
+  // and its setTimeout-driven DOM churn on scroll causes paint flashing.
+  (function(){
+    function kill(v){try{if(v.render_timer)clearTimeout(v.render_timer);v.render_timer=null;v.render=function(){};return true}catch(e){return false}}
+    function attempt(){return window.pdf2htmlEX&&window.pdf2htmlEX.defaultViewer&&kill(window.pdf2htmlEX.defaultViewer)}
+    if(!attempt()){var n=0,iv=setInterval(function(){if(attempt()||++n>100)clearInterval(iv)},20)}
+  })();
   var b=document.createElement('button');
   b.id='pdf2html-toggle';b.textContent='☰';b.title='Toggle sidebar (⌘. or s)';
   b.onclick=function(){document.body.classList.toggle('sidebar-shown')};
@@ -214,43 +221,52 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   });
   window.__pdf2htmlSetPin=function(f){pinFraction=f};
-  // Rolling render window — keep N pages visible above and below viewport so
-  // cross-page selection works, without inflating DOM for find-mode.
+  // Rolling render window — IntersectionObserver based. Browser re-evaluates
+  // intersections automatically on zoom/resize, so no stale-offset cache to go wrong.
   (function(){
     var container=document.getElementById('page-container');
     if(!container)return;
     var pages=Array.prototype.slice.call(container.querySelectorAll('.pf'));
     if(!pages.length)return;
-    var offsets=pages.map(function(p){return{top:p.offsetTop,bottom:p.offsetTop+p.offsetHeight}});
     var buffer=parseInt(localStorage.getItem('pdf2html-buffer')||'10',10);
     if(isNaN(buffer)||buffer<0)buffer=10;
     var renderAll=localStorage.getItem('pdf2html-render-all')==='1';
+    var idx=new Map();
+    pages.forEach(function(p,i){idx.set(p,i)});
+    var visible=new Set();
     var raf=null;
+    var allForced=false;
     function apply(){
-      var st=container.scrollTop,sb=st+container.clientHeight;
-      var vh=sb-st;
-      var threshold=Math.max(20,vh*0.05);
-      var first=-1,last=-1,best=0,bestOverlap=-1;
-      for(var i=0;i<offsets.length;i++){
-        var overlap=Math.min(offsets[i].bottom,sb)-Math.max(offsets[i].top,st);
-        if(overlap>bestOverlap){bestOverlap=overlap;best=i}
-        if(overlap>threshold){
-          if(first===-1)first=i;
-          last=i;
-        }else if(first!==-1)break;
+      if(renderAll){
+        if(allForced)return;
+        for(var i=0;i<pages.length;i++)pages[i].classList.add('pdf2html-force');
+        allForced=true;
+        return;
       }
-      if(first===-1){first=last=best}
+      allForced=false;
       var from,to;
-      if(renderAll){from=0;to=pages.length-1}
-      else{from=Math.max(0,first-buffer);to=Math.min(pages.length-1,last+buffer)}
+      if(visible.size===0){from=0;to=Math.min(pages.length-1,buffer)}
+      else{
+        var first=Infinity,last=-1;
+        visible.forEach(function(i){if(i<first)first=i;if(i>last)last=i});
+        from=Math.max(0,first-buffer);to=Math.min(pages.length-1,last+buffer);
+      }
       for(var i=0;i<pages.length;i++){
         var want=i>=from&&i<=to;
         if(want!==pages[i].classList.contains('pdf2html-force'))pages[i].classList.toggle('pdf2html-force',want);
       }
     }
     function sched(){if(raf)return;raf=requestAnimationFrame(function(){raf=null;apply()})}
-    container.addEventListener('scroll',sched,{passive:true});
-    window.addEventListener('resize',sched);
+    var observer=new IntersectionObserver(function(entries){
+      for(var i=0;i<entries.length;i++){
+        var n=idx.get(entries[i].target);
+        if(n===undefined)continue;
+        if(entries[i].isIntersecting)visible.add(n);
+        else visible.delete(n);
+      }
+      sched();
+    },{root:container,rootMargin:'-20px 0px',threshold:0});
+    pages.forEach(function(p){observer.observe(p)});
     // Sidebar config control
     var sidebar=document.getElementById('sidebar');
     if(sidebar){
@@ -285,7 +301,6 @@ document.addEventListener('DOMContentLoaded',function(){
         localStorage.setItem('pdf2html-pin',String(pinFraction));
       });
     }
-    apply();
   })();
   // Highlight the outline entry whose target page is the deepest one still ≤ current page
   (function(){
