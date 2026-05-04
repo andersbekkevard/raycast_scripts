@@ -49,7 +49,7 @@
     "url_patterns": [
       "facebook.com/messages", "messenger.com"
     ],
-    "default_url": "https://facebook.com/messages",
+    "default_url": "https://messenger.com",
     "use_history": false
   },
   {

@@ -128,6 +128,11 @@ body:not(.sidebar-shown) #page-container{left:0!important}
 #pdf2html-cheatsheet table{border-collapse:collapse;width:100%;margin:0}
 #pdf2html-cheatsheet td{padding:4px 0;vertical-align:top;font-size:13px}
 #pdf2html-cheatsheet td:first-child{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#f5deb3;padding-right:28px;white-space:nowrap}
+#pdf2html-palette{position:fixed;left:0;right:0;bottom:0;z-index:10001;display:flex;align-items:center;gap:6px;padding:8px 14px;background:#111;color:#f0f0f0;border-top:1px solid #333;font:14px ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:0 -6px 20px rgba(0,0,0,.5)}
+#pdf2html-palette-prompt{color:#99C1DA;font-weight:700}
+#pdf2html-palette-input{flex:1;background:transparent;border:0;outline:0;color:#fff;font:inherit;caret-color:#99C1DA}
+#pdf2html-pageno{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:9998;background:rgba(30,30,30,.85);color:#d0d0d0;padding:3px 10px;border-radius:5px;font:12px Helvetica,Arial,sans-serif;letter-spacing:.02em;box-shadow:0 2px 10px rgba(0,0,0,.35);user-select:none;pointer-events:none}
+body.pageno-hidden #pdf2html-pageno{display:none}
 </style>
 <script id="pdf2html-overlay-js">
 document.addEventListener('DOMContentLoaded',function(){
@@ -149,17 +154,16 @@ document.addEventListener('DOMContentLoaded',function(){
   });
   document.addEventListener('keydown',function(e){
     if(e.key!=='Escape')return;
+    var pal=document.getElementById('pdf2html-palette');
+    if(pal){e.preventDefault();e.stopPropagation();pal.remove();return}
     if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
     var cs=document.getElementById('pdf2html-cheatsheet');
     if(cs){cs.remove();return}
     var sel=window.getSelection();
     if(sel&&!sel.isCollapsed)sel.removeAllRanges();
   },true);
-  // ? — toggle cheatsheet overlay
-  document.addEventListener('keydown',function(e){
-    if(e.key!=='?')return;
-    if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
-    e.preventDefault();e.stopPropagation();
+  // Cheatsheet toggle (used by ? and :help)
+  function toggleCheat(){
     var ex=document.getElementById('pdf2html-cheatsheet');
     if(ex){ex.remove();return}
     var bg=document.createElement('div');
@@ -168,8 +172,19 @@ document.addEventListener('DOMContentLoaded',function(){
       +'<h3>OUR SHORTCUTS</h3><table>'
       +'<tr><td>s or ⌘.</td><td>Toggle sidebar</td></tr>'
       +'<tr><td>A</td><td>Toggle render-all pages</td></tr>'
+      +'<tr><td>⌘⇧.</td><td>Toggle page counter</td></tr>'
+      +'<tr><td>:</td><td>Open command palette</td></tr>'
       +'<tr><td>?</td><td>Toggle this help</td></tr>'
       +'<tr><td>Esc</td><td>Close overlay / clear selection</td></tr>'
+      +'</table>'
+      +'<h3>COMMAND PALETTE (:)</h3><table>'
+      +'<tr><td>:42</td><td>Goto page 42</td></tr>'
+      +'<tr><td>:pin 30</td><td>Set cursor pin to 30%</td></tr>'
+      +'<tr><td>:buffer 20</td><td>Set render buffer to ±20 pages</td></tr>'
+      +'<tr><td>:all</td><td>Toggle render-all</td></tr>'
+      +'<tr><td>:yank</td><td>Copy "Chapter · p. N" to clipboard</td></tr>'
+      +'<tr><td>:counter</td><td>Toggle page counter</td></tr>'
+      +'<tr><td>:help</td><td>Show this help</td></tr>'
       +'</table>'
       +'<h3>USEFUL VIMIUM</h3><table>'
       +'<tr><td>v</td><td>Visual mode (extend selection with j/k/w/b)</td></tr>'
@@ -185,7 +200,128 @@ document.addEventListener('DOMContentLoaded',function(){
       +'</table></div>';
     bg.addEventListener('click',function(ev){if(ev.target===bg)bg.remove()});
     document.body.appendChild(bg);
+  }
+  document.addEventListener('keydown',function(e){
+    if(e.key!=='?')return;
+    if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    e.preventDefault();e.stopPropagation();
+    toggleCheat();
   },true);
+  // : — command palette
+  function openPalette(){
+    var ex=document.getElementById('pdf2html-palette');
+    if(ex){ex.remove();return}
+    var wrap=document.createElement('div');
+    wrap.id='pdf2html-palette';
+    wrap.innerHTML='<span id="pdf2html-palette-prompt">:</span><input type="text" id="pdf2html-palette-input" autocomplete="off" spellcheck="false" autocapitalize="off">';
+    document.body.appendChild(wrap);
+    var input=document.getElementById('pdf2html-palette-input');
+    input.focus();
+    input.addEventListener('keydown',function(ev){
+      if(ev.key==='Escape'){ev.stopPropagation();ev.preventDefault();wrap.remove()}
+      else if(ev.key==='Enter'){ev.preventDefault();runCommand(input.value);wrap.remove()}
+    });
+  }
+  function runCommand(raw){
+    var parts=raw.trim().split(/\s+/);
+    if(!parts[0])return;
+    if(/^\d+$/.test(parts[0])){gotoPage(parseInt(parts[0],10));return}
+    var c=parts[0].toLowerCase(),arg=parts[1];
+    if((c==='p'||c==='page')&&arg)gotoPage(parseInt(arg,10));
+    else if(c==='pin'&&arg!==undefined)setInputCmd('pdf2html-pin-input',parseInt(arg,10));
+    else if((c==='buffer'||c==='buf')&&arg!==undefined)setInputCmd('pdf2html-buffer-input',parseInt(arg,10));
+    else if(c==='all')triggerChange('pdf2html-all-input',function(cb){cb.checked=!cb.checked});
+    else if(c==='yank'||c==='y')yankCurrent();
+    else if(c==='counter'||c==='num')window.__pdf2htmlTogglePageno&&window.__pdf2htmlTogglePageno();
+    else if(c==='help'||c==='h')toggleCheat();
+  }
+  function gotoPage(n){
+    if(!n||n<1)return;
+    var el=document.getElementById('pf'+n.toString(16));
+    if(el)el.scrollIntoView({block:'start'});
+  }
+  function setInputCmd(id,val){
+    if(isNaN(val))return;
+    var i=document.getElementById(id);
+    if(!i)return;
+    i.value=val;
+    i.dispatchEvent(new Event('change'));
+  }
+  function triggerChange(id,mut){
+    var el=document.getElementById(id);
+    if(!el)return;
+    mut(el);
+    el.dispatchEvent(new Event('change'));
+  }
+  function yankCurrent(){
+    var link=document.querySelector('#outline a.pdf2html-active');
+    var chapter=link?link.textContent.trim():'';
+    var pc=document.getElementById('page-container');
+    if(!pc)return;
+    var pages=document.querySelectorAll('.pf');
+    var st=pc.scrollTop,sb=st+pc.clientHeight,bestIdx=0,bestO=-1;
+    for(var i=0;i<pages.length;i++){
+      var t=pages[i].offsetTop,b=t+pages[i].offsetHeight;
+      var o=Math.min(b,sb)-Math.max(t,st);
+      if(o>bestO){bestO=o;bestIdx=i}
+    }
+    var text=(chapter?chapter+' · ':'')+'p. '+(bestIdx+1);
+    if(navigator.clipboard)navigator.clipboard.writeText(text);
+  }
+  document.addEventListener('keydown',function(e){
+    if(e.key!==':')return;
+    if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    e.preventDefault();e.stopPropagation();
+    openPalette();
+  },true);
+  // Page counter — small pill top-center, updates on scroll
+  (function(){
+    var container=document.getElementById('page-container');
+    if(!container)return;
+    var total=container.querySelectorAll('.pf').length;
+    if(!total)return;
+    var el=document.createElement('div');
+    el.id='pdf2html-pageno';
+    el.innerHTML='<span id="pdf2html-pageno-current">1</span> / '+total;
+    document.body.appendChild(el);
+    if(localStorage.getItem('pdf2html-pageno-hidden')==='1')document.body.classList.add('pageno-hidden');
+    var cur=document.getElementById('pdf2html-pageno-current');
+    function update(){
+      if(document.body.classList.contains('pageno-hidden'))return;
+      var r=container.getBoundingClientRect();
+      var hit=document.elementFromPoint(r.left+container.clientWidth/2,r.top+container.clientHeight/2);
+      while(hit&&hit!==document.body){
+        if(hit.classList&&hit.classList.contains('pf')){
+          var m=(hit.id||'').match(/pf([0-9a-f]+)/i);
+          if(m){
+            var n=parseInt(m[1],16);
+            if(cur.textContent!==String(n))cur.textContent=String(n);
+          }
+          return;
+        }
+        hit=hit.parentElement;
+      }
+    }
+    var raf=null;
+    container.addEventListener('scroll',function(){
+      if(raf)return;
+      raf=requestAnimationFrame(function(){raf=null;update()});
+    },{passive:true});
+    setTimeout(update,80);
+    window.__pdf2htmlTogglePageno=function(){
+      var hide=!document.body.classList.contains('pageno-hidden');
+      document.body.classList.toggle('pageno-hidden',hide);
+      localStorage.setItem('pdf2html-pageno-hidden',hide?'1':'0');
+      if(!hide)update();
+    };
+  })();
+  // ⌘⇧.  — toggle page counter
+  document.addEventListener('keydown',function(e){
+    if(!(e.metaKey&&e.shiftKey&&e.code==='Period'))return;
+    if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    e.preventDefault();
+    if(window.__pdf2htmlTogglePageno)window.__pdf2htmlTogglePageno();
+  });
   // A — toggle render-all pages
   document.addEventListener('keydown',function(e){
     if(e.key!=='A')return;
@@ -372,5 +508,3 @@ tell application \"Comet\"
     set URL of active tab of front window to \"${URL}\"
 end tell
 " >/dev/null 2>&1
-
-osascript -e 'do shell script "afplay /System/Library/Sounds/Glass.aiff &"' >/dev/null 2>&1

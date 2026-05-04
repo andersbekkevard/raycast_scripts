@@ -91,5 +91,3 @@ tell application \"Comet\"
     set URL of active tab of front window to \"${URL}\"
 end tell
 " >/dev/null 2>&1
-
-osascript -e 'do shell script "afplay /System/Library/Sounds/Glass.aiff &"' >/dev/null 2>&1
