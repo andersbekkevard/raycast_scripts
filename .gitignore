@@ -40,8 +40,8 @@ vendor/bundle/
 *.bak
 *.log
 *.cache
+*.profraw
 
 # Raycast
 .raycast/
 focus-configs.json
-
