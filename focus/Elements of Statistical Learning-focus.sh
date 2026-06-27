@@ -2,7 +2,7 @@
 
 # Required parameters:
 # @raycast.schemaVersion 1
-# @raycast.title Bok NLP Python Focus
+# @raycast.title ESL Focus
 # @raycast.mode silent
 
 # Optional parameters:
@@ -13,7 +13,7 @@
 
 # Check if Comet is already running
 if pgrep -x "Comet" > /dev/null; then
-    # Comet is running, focus Bok NLP Python Focus tab or open new tab
+    # Comet is running, focus ESL Focus tab or open new tab
     osascript <<'APPLESCRIPT_EOF'
 tell application "Comet"
     set targetWindowIndex to -1
@@ -36,7 +36,7 @@ tell application "Comet"
     -- Check if current tab matches the URL pattern
     set currentTabMatches to false
     if currentTabURL is not "" then
-        if currentTabURL contains "Natural%20Language%20Processing%20with%20Python.pdf" then
+        if currentTabURL contains "The%20Elements%20of%20Statistical%20Learning.pdf" then
             set currentTabMatches to true
             set anyMatchingTabFound to true
         end if
@@ -51,7 +51,7 @@ tell application "Comet"
         repeat with t from 1 to (count of windowTabs)
             try
                 set tabURL to URL of tab t of window w
-                if tabURL contains "Natural%20Language%20Processing%20with%20Python.pdf" then
+                if tabURL contains "The%20Elements%20of%20Statistical%20Learning.pdf" then
                     set end of matchingTabs to {windowIndex:w, tabIndex:t}
                     set anyMatchingTabFound to true
                     -- Check if this is the current tab
@@ -100,7 +100,7 @@ tell application "Comet"
         end if
         set frontWindow to window 1
         set tabCount to count of tabs of frontWindow
-        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/Natural%20Language%20Processing%20with%20Python.pdf"}
+        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Statistikk/The%20Elements%20of%20Statistical%20Learning.pdf"}
         set active tab index of frontWindow to (tabCount + 1)
     else
         -- Current tab matches but no other matching tab found, just activate (stay on current)
@@ -164,7 +164,7 @@ tell application "Comet"
     -- Check if current tab matches the URL pattern
     set currentTabMatches to false
     if currentTabURL is not "" then
-        if currentTabURL contains "Natural%20Language%20Processing%20with%20Python.pdf" then
+        if currentTabURL contains "The%20Elements%20of%20Statistical%20Learning.pdf" then
             set currentTabMatches to true
             set anyMatchingTabFound to true
         end if
@@ -179,7 +179,7 @@ tell application "Comet"
         repeat with t from 1 to (count of windowTabs)
             try
                 set tabURL to URL of tab t of window w
-                if tabURL contains "Natural%20Language%20Processing%20with%20Python.pdf" then
+                if tabURL contains "The%20Elements%20of%20Statistical%20Learning.pdf" then
                     set end of matchingTabs to {windowIndex:w, tabIndex:t}
                     set anyMatchingTabFound to true
                     -- Check if this is the current tab
@@ -226,7 +226,7 @@ tell application "Comet"
         end if
         set frontWindow to window 1
         set tabCount to count of tabs of frontWindow
-        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/Natural%20Language%20Processing%20with%20Python.pdf"}
+        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Statistikk/The%20Elements%20of%20Statistical%20Learning.pdf"}
         set active tab index of frontWindow to (tabCount + 1)
     else
         -- Current tab matches but no other matching tab found, just stay on current

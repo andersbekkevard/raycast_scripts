@@ -2,7 +2,7 @@
 
 # Required parameters:
 # @raycast.schemaVersion 1
-# @raycast.title Switch Input to Built-in Mic
+# @raycast.title Switch Input to Preferred Mic
 # @raycast.mode silent
 
 # Optional parameters:
@@ -10,7 +10,7 @@
 
 # Documentation:
 # @raycast.author Anders Bekkevard
-# @raycast.description Switches the default input from a Bluetooth device to the built-in microphone
+# @raycast.description Switches the default input to BY-GM18CU when available, otherwise to the built-in microphone
 
 swift - <<'SWIFT'
 import Foundation
@@ -21,6 +21,8 @@ struct InputDevice {
     let name: String
     let transportType: UInt32
 }
+
+let preferredInputName = "BY-GM18CU"
 
 func fail(_ message: String, status: OSStatus? = nil) -> Never {
     if let status {
@@ -229,6 +231,26 @@ func preferredBuiltInInput(from devices: [InputDevice]) -> InputDevice? {
         .first
 }
 
+func preferredNamedInput(from devices: [InputDevice], named preferredName: String) -> InputDevice? {
+    let lowercasedPreferredName = preferredName.lowercased()
+
+    return devices
+        .filter { $0.name.lowercased().contains(lowercasedPreferredName) }
+        .sorted {
+            if $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedSame {
+                return $0.id < $1.id
+            }
+
+            return $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+        }
+        .first
+}
+
+func preferredInput(from devices: [InputDevice]) -> InputDevice? {
+    return preferredNamedInput(from: devices, named: preferredInputName)
+        ?? preferredBuiltInInput(from: devices)
+}
+
 func setDefaultInputDevice(_ deviceID: AudioDeviceID) {
     var address = AudioObjectPropertyAddress(
         mSelector: kAudioHardwarePropertyDefaultInputDevice,
@@ -254,8 +276,8 @@ func setDefaultInputDevice(_ deviceID: AudioDeviceID) {
 let currentInput = defaultInputDevice()
 let devices = inputDevices()
 
-guard let targetInput = preferredBuiltInInput(from: devices) else {
-    fail("No built-in input device was found")
+guard let targetInput = preferredInput(from: devices) else {
+    fail("Neither \(preferredInputName) nor a built-in input device was found")
 }
 
 if currentInput.id == targetInput.id {

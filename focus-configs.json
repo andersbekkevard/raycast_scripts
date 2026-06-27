@@ -238,13 +238,23 @@
     "use_history": false
   },
   {
-    "name": "bok-nlp-python",
-    "title": "Bok NLP Python Focus",
+    "name": "Elements of Quantitative Investing",
+    "title": "EQI Focus",
     "icon": "📖",
     "url_patterns": [
-      "Natural%20Language%20Processing%20with%20Python.pdf"
+      "Giuseppe-a-Paleologo-The-Elements-of-Quantitative-Investing-Draft.pdf"
     ],
-    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/Natural%20Language%20Processing%20with%20Python.pdf",
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Quant/Giuseppe-a-Paleologo-The-Elements-of-Quantitative-Investing-Draft.pdf",
+    "use_history": false
+  },
+  {
+    "name": "Elements of Statistical Learning",
+    "title": "ESL Focus",
+    "icon": "📖",
+    "url_patterns": [
+      "The%20Elements%20of%20Statistical%20Learning.pdf"
+    ],
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Statistikk/The%20Elements%20of%20Statistical%20Learning.pdf",
     "use_history": false
   },
   {
@@ -256,6 +266,16 @@
     ],
     "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Quant/advanced-portfolio-management.pdf",
     "use_history": false
+  },
+  {
+    "name": "statistical-dog",
+    "title": "Statistical Dog Focus",
+    "icon": "🐶",
+    "url_patterns": [
+      "statistical.dog"
+    ],
+    "default_url": "https://www.statistical.dog/",
+    "use_history": true
   },
   {
     "name": "toggle-inbox",
