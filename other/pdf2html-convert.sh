@@ -9,6 +9,11 @@
 # @raycast.icon 📑
 # @raycast.description Convert file:// PDF tab to localhost HTML via pdf2htmlEX
 
+# Compatibility handoff: this command used to run the retired Docker-backed
+# converter below. Keep the old implementation in this file for reference,
+# but route the Raycast command to the maintained native-arm64 pipeline.
+exec /Users/andersbekkevard/dev/misc/pdf_viewer/raycast/pdf-viewer-convert.sh "$@"
+
 PORT=7433
 CACHE_DIR="$HOME/.cache/pdf2html-serve"
 LOG_FILE="$CACHE_DIR/log"
