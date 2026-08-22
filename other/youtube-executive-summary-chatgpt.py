@@ -1,0 +1,180 @@
+#!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#   "youtube-transcript-api>=1.2.4",
+# ]
+# ///
+
+import importlib.util
+import subprocess
+import sys
+from pathlib import Path
+from types import ModuleType
+
+
+PROMPT_PREFIX = "Give the executive summary of the following YouTube video:"
+CHATGPT_URL = "https://chatgpt.com/"
+
+
+def run_command(args: list[str], *, input_text: str | None = None) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        args,
+        input=input_text,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        check=False,
+    )
+
+
+def load_transcript_module() -> ModuleType:
+    module_path = Path(__file__).with_name("youtube-transcript-clipboard.py")
+    spec = importlib.util.spec_from_file_location("youtube_transcript_clipboard", module_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Could not load transcript helper: {module_path}")
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def active_comet_url() -> str:
+    script = r'''
+tell application "System Events"
+    if not (exists process "Comet") then return ""
+end tell
+
+tell application "Comet"
+    if (count of windows) is 0 then return ""
+    try
+        return URL of active tab of window 1
+    on error
+        return ""
+    end try
+end tell
+'''
+    result = run_command(["osascript"], input_text=script)
+    if result.returncode != 0:
+        return ""
+    return result.stdout.strip()
+
+
+def resolve_source(transcript_module: ModuleType) -> tuple[str, str]:
+    active_url = active_comet_url()
+    if active_url:
+        try:
+            transcript_module.extract_video_id(active_url)
+        except ValueError:
+            pass
+        else:
+            return active_url, "active Comet tab"
+
+    clipboard_value = transcript_module.read_clipboard()
+    if clipboard_value:
+        try:
+            transcript_module.extract_video_id(clipboard_value)
+        except ValueError:
+            pass
+        else:
+            return clipboard_value, "clipboard"
+
+    raise ValueError("Neither the active Comet tab nor the clipboard contains a supported YouTube URL.")
+
+
+def fetch_transcript(transcript_module: ModuleType, source: str) -> tuple[str, str]:
+    video_id = transcript_module.extract_video_id(source)
+    choice = transcript_module.choose_transcript(video_id)
+    fetched = choice.transcript.fetch()
+    text = transcript_module.format_transcript_text(list(fetched))
+
+    language_note = choice.transcript.language_code
+    if not choice.used_preferred_language:
+        language_note = f"{language_note} (first available)"
+    return text, language_note
+
+
+def open_chatgpt_and_submit(prompt: str) -> None:
+    open_script = rf'''
+tell application "Comet"
+    activate
+    if (count of windows) is 0 then make new window
+
+    set frontWindow to window 1
+    set tabCount to count of tabs of frontWindow
+    make new tab at end of tabs of frontWindow with properties {{URL:"{CHATGPT_URL}"}}
+    set active tab index of frontWindow to (tabCount + 1)
+
+    repeat 150 times
+        try
+            set chatTab to active tab of window 1
+            if (URL of chatTab contains "chatgpt.com") and (loading of chatTab is false) then exit repeat
+        end try
+        delay 0.1
+    end repeat
+end tell
+'''
+    open_result = run_command(["osascript"], input_text=open_script)
+    if open_result.returncode != 0:
+        raise RuntimeError(open_result.stderr.strip() or "Failed to open a new ChatGPT tab.")
+
+    clipboard_result = run_command(["pbcopy"], input_text=prompt)
+    if clipboard_result.returncode != 0:
+        raise RuntimeError(clipboard_result.stderr.strip() or "Failed to copy the prompt.")
+
+    submit_script = r'''
+tell application "Comet" to activate
+delay 0.3
+tell application "System Events"
+    key code 53
+    delay 0.1
+    keystroke "g"
+    keystroke "i"
+    delay 0.3
+    key code 9 using {command down}
+end tell
+
+repeat 30 times
+    tell application "Comet"
+        try
+            if URL of active tab of window 1 contains "chatgpt.com/c/" then return "submitted"
+        end try
+    end tell
+    tell application "System Events" to key code 36
+    delay 0.5
+end repeat
+return "not-submitted"
+'''
+    result = run_command(["osascript"], input_text=submit_script)
+    if result.returncode != 0:
+        raise RuntimeError(
+            result.stderr.strip()
+            or "Opened ChatGPT and copied the prompt, but automatic submission failed."
+        )
+    if result.stdout.strip() != "submitted":
+        raise RuntimeError("The prompt was pasted, but ChatGPT did not confirm submission.")
+
+
+def main() -> int:
+    try:
+        transcript_module = load_transcript_module()
+        source, source_label = resolve_source(transcript_module)
+        transcript, language_note = fetch_transcript(transcript_module, source)
+        prompt = f"{PROMPT_PREFIX}\n\n{transcript}"
+        open_chatgpt_and_submit(prompt)
+    except Exception as exc:
+        try:
+            message = transcript_module.friendly_error(exc)
+        except UnboundLocalError:
+            message = str(exc).strip() or "Failed to summarize the YouTube video."
+        print(message, file=sys.stderr)
+        return 1
+
+    print(f"Sent transcript from {source_label} to ChatGPT ({language_note}).")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

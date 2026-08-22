@@ -12,6 +12,9 @@ from pathlib import Path
 APP_SUPPORT_DIR = Path.home() / "Library/Application Support/TypeWhisper"
 HISTORY_DB_PATH = APP_SUPPORT_DIR / "history.store"
 AUDIO_DIR = APP_SUPPORT_DIR / "audio"
+RAYCAST_DICTATION_RECORDINGS_DIR = (
+    Path.home() / "Library/Application Support/com.raycast-x.macos/dictation-recordings"
+)
 GROQ_TRANSCRIPTIONS_URL = "https://api.groq.com/openai/v1/audio/transcriptions"
 GROQ_MODEL = "whisper-large-v3"
 APPLE_REFERENCE_DATE = datetime(2001, 1, 1, tzinfo=timezone.utc)
@@ -97,6 +100,28 @@ def load_recent_audio_entries(limit: int = 10) -> list[HistoryEntry]:
         )
 
     return entries
+
+
+def load_latest_raycast_dictation_recording() -> Path:
+    """Return the newest locally retained Raycast Beta dictation recording."""
+    if not RAYCAST_DICTATION_RECORDINGS_DIR.exists():
+        raise RuntimeError(
+            "Raycast Beta dictation recordings were not found at "
+            f"{RAYCAST_DICTATION_RECORDINGS_DIR}"
+        )
+
+    recordings = [
+        recording
+        for recording in RAYCAST_DICTATION_RECORDINGS_DIR.glob("*.wav")
+        if recording.is_file()
+    ]
+    if not recordings:
+        raise RuntimeError(
+            "No saved Raycast Beta dictation WAV files found. "
+            "Record a dictation first."
+        )
+
+    return max(recordings, key=lambda recording: recording.stat().st_mtime_ns)
 
 
 def transcribe_audio(audio_path: Path) -> str:

@@ -100,10 +100,10 @@ generate_history_function() {
     
     # Use quoted heredoc delimiter to prevent variable expansion, then replace placeholders
     local func_output=$(cat <<'HISTORY_FUNC_EOF'
-# Function to get most recent URL from Comet history
+# Function to get most recent URL from Aside history
 get_most_recent_url() {
-    local history_db="$HOME/Library/Application Support/Comet/Default/History"
-    local temp_history="/tmp/comet_history_temp_$$.db"
+    local history_db="$HOME/Library/Application Support/Aside/Default/History"
+    local temp_history="/tmp/aside_history_temp_$$.db"
     
     # Check if history database exists
     if [ ! -f "$history_db" ]; then
@@ -245,11 +245,11 @@ EOF
     fi
     
     cat >> "focus/${name}-focus.sh" <<EOF
-# Check if Comet is already running
-if pgrep -x "Comet" > /dev/null; then
-    # Comet is running, focus ${title} tab or open new tab
+# Check if Aside is already running
+if pgrep -x "Aside" > /dev/null; then
+    # Aside is running, focus ${title} tab or open new tab
     osascript <<${heredoc_delimiter}
-tell application "Comet"
+tell application "Aside"
 EOF
     
     # Add targetURL variable only if use_history is true
@@ -353,9 +353,9 @@ EOF
 end tell
 APPLESCRIPT_EOF
 else
-    # Comet is not running, launch it and wait for tabs to restore, then search
+    # Aside is not running, launch it and wait for tabs to restore, then search
     osascript <<${heredoc_delimiter}
-tell application "Comet"
+tell application "Aside"
 EOF
     
     # Add targetURL variable only if use_history is true
@@ -366,10 +366,10 @@ EOF
     fi
     
     cat >> "focus/${name}-focus.sh" <<EOF
-    -- Launch Comet without opening a specific URL (so it restores previous tabs)
+    -- Launch Aside without opening a specific URL (so it restores previous tabs)
     activate
     
-    -- Wait dynamically for Comet to fully launch and restore tabs
+    -- Wait dynamically for Aside to fully launch and restore tabs
     -- Poll until windows exist and tabs are loaded (max 5 seconds)
     set maxWaitTime to 5
     set waitInterval to 0.1
@@ -502,4 +502,3 @@ done
 
 echo ""
 echo "All focus scripts generated successfully!"
-

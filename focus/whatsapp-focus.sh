@@ -11,10 +11,10 @@
 # Documentation:
 # @raycast.author Anders Bekkevard
 
-# Function to get most recent URL from Comet history
+# Function to get most recent URL from Aside history
 get_most_recent_url() {
-    local history_db="$HOME/Library/Application Support/Comet/Default/History"
-    local temp_history="/tmp/comet_history_temp_$$.db"
+    local history_db="$HOME/Library/Application Support/Aside/Default/History"
+    local temp_history="/tmp/aside_history_temp_$$.db"
     
     # Check if history database exists
     if [ ! -f "$history_db" ]; then
@@ -51,11 +51,11 @@ get_most_recent_url() {
 
 # Get the target URL from history
 TARGET_URL=$(get_most_recent_url)
-# Check if Comet is already running
-if pgrep -x "Comet" > /dev/null; then
-    # Comet is running, focus WhatsApp Focus tab or open new tab
+# Check if Aside is already running
+if pgrep -x "Aside" > /dev/null; then
+    # Aside is running, focus WhatsApp Focus tab or open new tab
     osascript <<APPLESCRIPT_EOF
-tell application "Comet"
+tell application "Aside"
     set targetURL to "$TARGET_URL"
     set targetWindowIndex to -1
     set targetTabIndex to -1
@@ -150,14 +150,14 @@ tell application "Comet"
 end tell
 APPLESCRIPT_EOF
 else
-    # Comet is not running, launch it and wait for tabs to restore, then search
+    # Aside is not running, launch it and wait for tabs to restore, then search
     osascript <<APPLESCRIPT_EOF
-tell application "Comet"
+tell application "Aside"
     set targetURL to "$TARGET_URL"
-    -- Launch Comet without opening a specific URL (so it restores previous tabs)
+    -- Launch Aside without opening a specific URL (so it restores previous tabs)
     activate
     
-    -- Wait dynamically for Comet to fully launch and restore tabs
+    -- Wait dynamically for Aside to fully launch and restore tabs
     -- Poll until windows exist and tabs are loaded (max 5 seconds)
     set maxWaitTime to 5
     set waitInterval to 0.1

@@ -38,6 +38,8 @@ def run_command(args: list[str], *, input_text: str | None = None) -> subprocess
         args,
         input=input_text,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         capture_output=True,
         check=False,
     )

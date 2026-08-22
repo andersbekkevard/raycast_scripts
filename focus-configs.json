@@ -49,7 +49,7 @@
     "url_patterns": [
       "facebook.com/messages", "messenger.com"
     ],
-    "default_url": "https://messenger.com",
+    "default_url": "https://www.facebook.com/messages",
     "use_history": false
   },
   {
@@ -126,6 +126,19 @@
     "use_history": false
   },
   {
+    "name": "google",
+    "title": "Google Focus",
+    "icon": "🔎",
+    "url_patterns": [
+      "www.google.com/search",
+      "google.com/search",
+      "www.google.com/webhp",
+      "google.com/webhp"
+    ],
+    "default_url": "https://www.google.com/search?q=",
+    "use_history": false
+  },
+  {
     "name": "maps",
     "title": "Google Maps Focus",
     "icon": "🗺️",
@@ -188,6 +201,26 @@
     "use_history": false
   },
   {
+    "name": "bok-algdat",
+    "title": "Bok AlgDat Focus",
+    "icon": "📖",
+    "url_patterns": [
+      "AlgDat-Pensumbok.pdf"
+    ],
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/AlgDat-Pensumbok.pdf",
+    "use_history": false
+  },
+  {
+    "name": "bok-datamaskiner",
+    "title": "Bok Datamaskiner Focus",
+    "icon": "📖",
+    "url_patterns": [
+      "Datamaskiner-Pensumbok.pdf"
+    ],
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/Datamaskiner-Pensumbok.pdf",
+    "use_history": false
+  },
+  {
     "name": "bok-databaser",
     "title": "Bok Databaser Focus",
     "icon": "📖",
@@ -205,6 +238,16 @@
       "Databaser%20hefte.pdf"
     ],
     "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/Databaser%20hefte.pdf",
+    "use_history": false
+  },
+  {
+    "name": "pensumhefte-algdat",
+    "title": "Pensumhefte AlgDat Focus",
+    "icon": "📖",
+    "url_patterns": [
+      "pensumhefte.pdf"
+    ],
+    "default_url": "file:///Users/andersbekkevard/dev/python/school/exam_aid/sources/pensumhefte.pdf",
     "use_history": false
   },
   {
@@ -265,6 +308,26 @@
       "%advanced-portfolio-management.pdf"
     ],
     "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Quant/advanced-portfolio-management.pdf",
+    "use_history": false
+  },
+  {
+    "name": "RISC-V Reference Card",
+    "title": "RISC-V Reference Card Focus",
+    "icon": "📄",
+    "url_patterns": [
+      "RISC-V-Reference"
+    ],
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/Fag/Datamaskiner/RISC-V-Reference.pdf",
+    "use_history": false
+  },
+  {
+    "name": "formelark-fysikk",
+    "title": "Formelark Fysikk Focus",
+    "icon": "📄",
+    "url_patterns": [
+      "Formelark%20Fysikk"
+    ],
+    "default_url": "file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/Fag/Fysikk/Formelark%20Fysikk.pdf",
     "use_history": false
   },
   {

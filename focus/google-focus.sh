@@ -2,18 +2,18 @@
 
 # Required parameters:
 # @raycast.schemaVersion 1
-# @raycast.title Bok AlgDat Focus
+# @raycast.title Google Focus
 # @raycast.mode silent
 
 # Optional parameters:
-# @raycast.icon 📖
+# @raycast.icon 🔎
 
 # Documentation:
 # @raycast.author Anders Bekkevard
 
 # Check if Aside is already running
 if pgrep -x "Aside" > /dev/null; then
-    # Aside is running, focus Bok AlgDat Focus tab or open new tab
+    # Aside is running, focus Google Focus tab or open new tab
     osascript <<'APPLESCRIPT_EOF'
 tell application "Aside"
     set targetWindowIndex to -1
@@ -36,7 +36,7 @@ tell application "Aside"
     -- Check if current tab matches the URL pattern
     set currentTabMatches to false
     if currentTabURL is not "" then
-        if currentTabURL contains "AlgDat-Pensumbok.pdf" then
+        if currentTabURL contains "www.google.com/search" or currentTabURL contains "google.com/search" or currentTabURL contains "www.google.com/webhp" or currentTabURL contains "google.com/webhp" then
             set currentTabMatches to true
             set anyMatchingTabFound to true
         end if
@@ -51,7 +51,7 @@ tell application "Aside"
         repeat with t from 1 to (count of windowTabs)
             try
                 set tabURL to URL of tab t of window w
-                if tabURL contains "AlgDat-Pensumbok.pdf" then
+                if tabURL contains "www.google.com/search" or tabURL contains "google.com/search" or tabURL contains "www.google.com/webhp" or tabURL contains "google.com/webhp" then
                     set end of matchingTabs to {windowIndex:w, tabIndex:t}
                     set anyMatchingTabFound to true
                     -- Check if this is the current tab
@@ -100,7 +100,7 @@ tell application "Aside"
         end if
         set frontWindow to window 1
         set tabCount to count of tabs of frontWindow
-        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/AlgDat-Pensumbok.pdf"}
+        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"https://www.google.com/search?q="}
         set active tab index of frontWindow to (tabCount + 1)
     else
         -- Current tab matches but no other matching tab found, just activate (stay on current)
@@ -164,7 +164,7 @@ tell application "Aside"
     -- Check if current tab matches the URL pattern
     set currentTabMatches to false
     if currentTabURL is not "" then
-        if currentTabURL contains "AlgDat-Pensumbok.pdf" then
+        if currentTabURL contains "www.google.com/search" or currentTabURL contains "google.com/search" or currentTabURL contains "www.google.com/webhp" or currentTabURL contains "google.com/webhp" then
             set currentTabMatches to true
             set anyMatchingTabFound to true
         end if
@@ -179,7 +179,7 @@ tell application "Aside"
         repeat with t from 1 to (count of windowTabs)
             try
                 set tabURL to URL of tab t of window w
-                if tabURL contains "AlgDat-Pensumbok.pdf" then
+                if tabURL contains "www.google.com/search" or tabURL contains "google.com/search" or tabURL contains "www.google.com/webhp" or tabURL contains "google.com/webhp" then
                     set end of matchingTabs to {windowIndex:w, tabIndex:t}
                     set anyMatchingTabFound to true
                     -- Check if this is the current tab
@@ -226,7 +226,7 @@ tell application "Aside"
         end if
         set frontWindow to window 1
         set tabCount to count of tabs of frontWindow
-        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"file:///Users/andersbekkevard/Library/CloudStorage/OneDrive-NTNU/NTNU%20Desktop/B%C3%B8ker/Pensum/AlgDat-Pensumbok.pdf"}
+        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"https://www.google.com/search?q="}
         set active tab index of frontWindow to (tabCount + 1)
     else
         -- Current tab matches but no other matching tab found, just stay on current

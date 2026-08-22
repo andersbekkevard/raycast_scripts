@@ -11,11 +11,11 @@
 # Documentation:
 # @raycast.author Anders Bekkevard
 
-# Check if Comet is already running
-if pgrep -x "Comet" > /dev/null; then
-    # Comet is running, focus Messenger Focus tab or open new tab
+# Check if Aside is already running
+if pgrep -x "Aside" > /dev/null; then
+    # Aside is running, focus Messenger Focus tab or open new tab
     osascript <<'APPLESCRIPT_EOF'
-tell application "Comet"
+tell application "Aside"
     set targetWindowIndex to -1
     set targetTabIndex to -1
     set foundTab to false
@@ -100,7 +100,7 @@ tell application "Comet"
         end if
         set frontWindow to window 1
         set tabCount to count of tabs of frontWindow
-        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"https://messenger.com"}
+        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"https://www.facebook.com/messages"}
         set active tab index of frontWindow to (tabCount + 1)
     else
         -- Current tab matches but no other matching tab found, just activate (stay on current)
@@ -109,13 +109,13 @@ tell application "Comet"
 end tell
 APPLESCRIPT_EOF
 else
-    # Comet is not running, launch it and wait for tabs to restore, then search
+    # Aside is not running, launch it and wait for tabs to restore, then search
     osascript <<'APPLESCRIPT_EOF'
-tell application "Comet"
-    -- Launch Comet without opening a specific URL (so it restores previous tabs)
+tell application "Aside"
+    -- Launch Aside without opening a specific URL (so it restores previous tabs)
     activate
     
-    -- Wait dynamically for Comet to fully launch and restore tabs
+    -- Wait dynamically for Aside to fully launch and restore tabs
     -- Poll until windows exist and tabs are loaded (max 5 seconds)
     set maxWaitTime to 5
     set waitInterval to 0.1
@@ -226,7 +226,7 @@ tell application "Comet"
         end if
         set frontWindow to window 1
         set tabCount to count of tabs of frontWindow
-        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"https://messenger.com"}
+        set newTab to make new tab at end of tabs of frontWindow with properties {URL:"https://www.facebook.com/messages"}
         set active tab index of frontWindow to (tabCount + 1)
     else
         -- Current tab matches but no other matching tab found, just stay on current
