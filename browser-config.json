@@ -1,5 +1,5 @@
 {
-  "default_browser": "Aside",
+  "default_browser": "Comet",
   "browsers": ["Aside", "Comet", "Google Chrome", "Safari"],
   "reuse_matching_tabs": true,
   "prefer_focused_browser": true,
