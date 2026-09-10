@@ -36,8 +36,11 @@ fail() {
     exit 1
 }
 
-# Get active tab URL from Comet
-TAB_URL=$(osascript -e 'tell application "Comet" to return URL of active tab of front window' 2>/dev/null)
+# Keep the original browser and tab throughout conversion.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/browser.sh"
+SOURCE_TAB=$(browser_control active) || exit 1
+TAB_URL=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["url"])' "$SOURCE_TAB")
 
 # Validate file:// *.pdf
 if [[ ! "$TAB_URL" =~ ^file://.*\.[pP][dD][fF]$ ]]; then
@@ -508,8 +511,4 @@ URL="http://localhost:${PORT}/${HASH}/${ENCODED_NAME}"
 } > "$MAP_FILE.tmp" && mv "$MAP_FILE.tmp" "$MAP_FILE"
 
 # Navigate current tab in-place so back-button returns to the source PDF
-osascript -e "
-tell application \"Comet\"
-    set URL of active tab of front window to \"${URL}\"
-end tell
-" >/dev/null 2>&1
+browser_control navigate "$URL" --source "$SOURCE_TAB" || fail "Source tab changed or could not be navigated"

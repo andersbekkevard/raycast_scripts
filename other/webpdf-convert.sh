@@ -11,8 +11,11 @@
 
 PORT=7432
 
-# Get active tab URL from Comet
-TAB_URL=$(osascript -e 'tell application "Comet" to return URL of active tab of front window' 2>/dev/null)
+# Pin the source tab so a slow conversion cannot navigate a different tab.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/browser.sh"
+SOURCE_TAB=$(browser_control active) || exit 1
+TAB_URL=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["url"])' "$SOURCE_TAB")
 
 # Validate: must be file://*.pdf
 if [[ ! "$TAB_URL" =~ ^file://.*\.pdf$ ]] && [[ ! "$TAB_URL" =~ ^file://.*\.PDF$ ]]; then
@@ -37,24 +40,7 @@ if ! curl -sf "http://localhost:${PORT}/" > /dev/null 2>&1; then
     done
 fi
 
-# Close current tab, then open localhost URL
-osascript -e "
-tell application \"Comet\"
-    set frontWindow to front window
-    set tabCount to count of tabs of frontWindow
-    if tabCount > 1 then
-        close active tab of frontWindow
-    else
-        close frontWindow
-    end if
-    delay 0.1
-    if (count of windows) = 0 then
-        make new window
-    end if
-    tell front window
-        make new tab at end of tabs with properties {URL:\"${LOCALHOST_URL}\"}
-    end tell
-end tell
-"
+# Navigate the original tab in place.
+browser_control navigate "$LOCALHOST_URL" --source "$SOURCE_TAB" || exit 1
 
 osascript -e 'do shell script "afplay /System/Library/Sounds/Glass.aiff &"'

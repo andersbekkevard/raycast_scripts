@@ -8,9 +8,16 @@
 
 import importlib.util
 import subprocess
+import time
 import sys
 from pathlib import Path
 from types import ModuleType
+
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib'))
+import browser_control
+
+SELECTED_BROWSER = None
 
 
 PROMPT_PREFIX = "Give the executive summary of the following YouTube video:"
@@ -41,36 +48,25 @@ def load_transcript_module() -> ModuleType:
     return module
 
 
-def active_comet_url() -> str:
-    script = r'''
-tell application "System Events"
-    if not (exists process "Comet") then return ""
-end tell
-
-tell application "Comet"
-    if (count of windows) is 0 then return ""
-    try
-        return URL of active tab of window 1
-    on error
+def active_browser_url() -> str:
+    global SELECTED_BROWSER
+    cfg, ctx = browser_control.config(), browser_control.context()
+    windows = browser_control.inventory(cfg, ctx)
+    SELECTED_BROWSER = browser_control.select_browser(cfg, windows, ctx['front'])
+    if not windows.get(SELECTED_BROWSER):
         return ""
-    end try
-end tell
-'''
-    result = run_command(["osascript"], input_text=script)
-    if result.returncode != 0:
-        return ""
-    return result.stdout.strip()
+    return browser_control.active(cfg, ctx, windows)['url']
 
 
 def resolve_source(transcript_module: ModuleType) -> tuple[str, str]:
-    active_url = active_comet_url()
+    active_url = active_browser_url()
     if active_url:
         try:
             transcript_module.extract_video_id(active_url)
         except ValueError:
             pass
         else:
-            return active_url, "active Comet tab"
+            return active_url, "active browser tab"
 
     clipboard_value = transcript_module.read_clipboard()
     if clipboard_value:
@@ -81,7 +77,7 @@ def resolve_source(transcript_module: ModuleType) -> tuple[str, str]:
         else:
             return clipboard_value, "clipboard"
 
-    raise ValueError("Neither the active Comet tab nor the clipboard contains a supported YouTube URL.")
+    raise ValueError("Neither the active browser tab nor the clipboard contains a supported YouTube URL.")
 
 
 def fetch_transcript(transcript_module: ModuleType, source: str) -> tuple[str, str]:
@@ -97,29 +93,15 @@ def fetch_transcript(transcript_module: ModuleType, source: str) -> tuple[str, s
 
 
 def open_chatgpt_and_submit(prompt: str) -> None:
-    open_script = rf'''
-tell application "Comet"
-    activate
-    if (count of windows) is 0 then make new window
-
-    set frontWindow to window 1
-    set tabCount to count of tabs of frontWindow
-    make new tab at end of tabs of frontWindow with properties {{URL:"{CHATGPT_URL}"}}
-    set active tab index of frontWindow to (tabCount + 1)
-
-    repeat 150 times
-        try
-            set chatTab to active tab of window 1
-            if (URL of chatTab contains "chatgpt.com") and (loading of chatTab is false) then exit repeat
-        end try
-        delay 0.1
-    end repeat
-end tell
-'''
-    open_result = run_command(["osascript"], input_text=open_script)
-    if open_result.returncode != 0:
-        raise RuntimeError(open_result.stderr.strip() or "Failed to open a new ChatGPT tab.")
-
+    browser = SELECTED_BROWSER or browser_control.config()['default_browser']
+    browser_control.bridge(browser, 'open', {'url': CHATGPT_URL})
+    deadline = time.monotonic() + 15
+    while time.monotonic() < deadline:
+        if browser_control.bridge(browser, 'ready'):
+            break
+        time.sleep(0.1)
+    if browser == 'Safari':
+        time.sleep(2)
     clipboard_result = run_command(["pbcopy"], input_text=prompt)
     if clipboard_result.returncode != 0:
         raise RuntimeError(clipboard_result.stderr.strip() or "Failed to copy the prompt.")
@@ -147,6 +129,9 @@ repeat 30 times
 end repeat
 return "not-submitted"
 '''
+    submit_script = submit_script.replace('"Comet"', '"' + browser + '"')
+    if browser == 'Safari':
+        submit_script = submit_script.replace('active tab', 'current tab')
     result = run_command(["osascript"], input_text=submit_script)
     if result.returncode != 0:
         raise RuntimeError(

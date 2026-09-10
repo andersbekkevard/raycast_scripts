@@ -1,0 +1,8 @@
+{
+  "default_browser": "Aside",
+  "browsers": ["Aside", "Comet", "Google Chrome", "Safari"],
+  "reuse_matching_tabs": true,
+  "prefer_focused_browser": true,
+  "reuse_single_open_browser": true,
+  "cycle_matching_tabs": true
+}
