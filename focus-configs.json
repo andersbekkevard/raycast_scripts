@@ -83,6 +83,16 @@
     "use_history": true
   },
   {
+    "name": "teams",
+    "title": "Microsoft Teams Focus",
+    "icon": "👥",
+    "url_patterns": [
+      "teams.cloud.microsoft"
+    ],
+    "default_url": "https://teams.cloud.microsoft/",
+    "use_history": true
+  },
+  {
     "name": "toggl",
     "title": "Toggl Focus",
     "icon": "⏱️",
@@ -102,6 +112,16 @@
       "todoist.com"
     ],
     "default_url": "https://app.todoist.com/app/project/studie-6RWxW3r5GcXRrr8v",
+    "use_history": true
+  },
+  {
+    "name": "google-tasks",
+    "title": "Google Tasks Focus",
+    "icon": "☑️",
+    "url_patterns": [
+      "tasks.google.com"
+    ],
+    "default_url": "https://tasks.google.com/tasks/",
     "use_history": true
   },
   {

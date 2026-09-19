@@ -3,6 +3,24 @@ Primary is to focus/switch between browser tabs matching URL patterns.
 Includes generator for creating focus scripts from JSON config, with optional browser history lookup to open most recently visited URLs.
 Configure in `focus-configs.json` and regenerate with `generate-history-scripts.sh`.
 
+`other/raycast-beta-dictation-english.sh` and `other/raycast-beta-dictation-norwegian.sh` set the Dictation language in Raycast Beta only. They use the visible Raycast Beta settings controls and require Accessibility permission for Raycast Beta.
+
+## Voice Keys
+
+`hammerspoon/voice_keys.lua` turns spoken keyboard chords into real keypresses. Press the lower M650 side button and speak immediately. Hammerspoon records with SoX, stops after 550 ms of speech-ending silence, sends the WAV to TypeWhisper's local CLI using Groq Whisper Large V3 Turbo, parses the result without an LLM, and emits the chord. An eight-second safety timeout stops abandoned recordings.
+
+Initial semantic commands are `undo`, `redo`, `copy`, `paste`, `select all`, `escape`, and `enter`. The generic grammar accepts commands such as `command W`, `command shift Z`, `control shift tab`, and `super 1`. `super` matches Raycast's Hyper Key: Command + Option + Control. It is configurable in `hammerspoon/init.lua`.
+
+The live Hammerspoon config loads `hammerspoon/init.lua`. The M650 mapping is: front side button keeps its Option-Space dictation Smart Action, the lower side button uses Logi's Middle button action as the Voice Keys trigger, and wheel click sends Return. Logi collapses programmable-button holds into taps, so Voice Keys starts on that tap and uses silence detection rather than button release to stop.
+
+Visual state feedback appears immediately: green `Listening` confirms the trigger reached Hammerspoon, amber `Transcribing` confirms release and processing, blue `Executed …` confirms key emission, and red text identifies an error. No feedback means the failure is before Hammerspoon.
+
+Run the parser tests with:
+
+```sh
+lua tests/test_voice_keys_parser.lua
+```
+
 ## Shared browser control (macOS)
 
 `browser-config.json` is the single browser preference for this repository.
