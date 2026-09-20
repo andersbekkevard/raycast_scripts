@@ -125,6 +125,16 @@
     "use_history": true
   },
   {
+    "name": "student",
+    "title": "Student Focus",
+    "icon": "🎓",
+    "url_patterns": [
+      "student.bekkevard.me"
+    ],
+    "default_url": "https://student.bekkevard.me/",
+    "use_history": true
+  },
+  {
     "name": "youtube",
     "title": "YouTube Focus",
     "icon": "📺",
