@@ -5,6 +5,10 @@ Configure in `focus-configs.json` and regenerate with `generate-history-scripts.
 
 `other/raycast-beta-dictation-english.sh` and `other/raycast-beta-dictation-norwegian.sh` set the Dictation language in Raycast Beta only. They use the visible Raycast Beta settings controls and require Accessibility permission for Raycast Beta.
 
+## HeadFlow
+
+The `other/headflow-*.sh` Raycast script commands use the installed `~/.local/bin/headflow` CLI. Add this repository's `other/` directory under Raycast Script Commands, then assign shortcuts in Raycast to **Cycle HeadFlow Mode**, **Toggle HeadFlow**, **Turn HeadFlow On**, or **Turn HeadFlow Off**. Cycle follows Cursor -> Continuous -> Auto-read -> Cursor. The commands report when a setting was saved but the running app did not acknowledge it. The app must be installed with its existing permissions for head control to work.
+
 ## Voice Keys
 
 `hammerspoon/voice_keys.lua` turns spoken keyboard chords into real keypresses. Press the lower M650 side button and speak immediately. Hammerspoon records with SoX, stops after 550 ms of speech-ending silence, sends the WAV to TypeWhisper's local CLI using Groq Whisper Large V3 Turbo, parses the result without an LLM, and emits the chord. An eight-second safety timeout stops abandoned recordings.
