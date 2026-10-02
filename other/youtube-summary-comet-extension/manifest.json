@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "YouTube Executive Summary Bridge",
+  "name": "Anders YouTube Summary",
   "version": "1.0.0",
   "description": "Submits a locally fetched YouTube transcript to ChatGPT without timing-based keyboard automation.",
   "host_permissions": [
@@ -12,9 +12,27 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://chatgpt.com/*"],
-      "js": ["content.js"],
+      "matches": [
+        "https://chatgpt.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
-  ]
+  ],
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  }
 }
