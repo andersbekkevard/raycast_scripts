@@ -51,13 +51,13 @@ def load_transcript_module() -> ModuleType:
     return module
 
 
-def active_comet_url() -> str:
+def active_browser_url() -> str:
     script = r'''
 tell application "System Events"
-    if not (exists process "Comet") then return ""
+    if not (exists process "Google Chrome") then return ""
 end tell
 
-tell application "Comet"
+tell application "Google Chrome"
     if (count of windows) is 0 then return ""
     try
         return URL of active tab of window 1
@@ -71,14 +71,14 @@ end tell
 
 
 def resolve_source(transcript_module: ModuleType) -> tuple[str, str]:
-    active_url = active_comet_url()
+    active_url = active_browser_url()
     if active_url:
         try:
             transcript_module.extract_video_id(active_url)
         except ValueError:
             pass
         else:
-            return active_url, "active Comet tab"
+            return active_url, "active Chrome tab"
 
     clipboard_value = transcript_module.read_clipboard()
     if clipboard_value:
@@ -89,7 +89,7 @@ def resolve_source(transcript_module: ModuleType) -> tuple[str, str]:
         else:
             return clipboard_value, "clipboard"
 
-    raise ValueError("Neither the active Comet tab nor the clipboard contains a supported YouTube URL.")
+    raise ValueError("Neither the active Chrome tab nor the clipboard contains a supported YouTube URL.")
 
 
 def fetch_prompt(transcript_module: ModuleType, source: str) -> tuple[str, str]:
@@ -194,7 +194,7 @@ def open_chatgpt(port: int, token: str, *, replace_video_id: str | None) -> None
     url = f"{CHATGPT_URL}?{query}"
     expected_video_id = replace_video_id or ""
     script = rf'''
-tell application "Comet"
+tell application "Google Chrome"
     activate
     if (count of windows) is 0 then make new window
     set frontWindow to window 1
@@ -218,7 +218,7 @@ end tell
 '''
     result = run_command(["osascript"], input_text=script)
     if result.returncode != 0:
-        raise RuntimeError(result.stderr.strip() or "Failed to open ChatGPT in Comet.")
+        raise RuntimeError(result.stderr.strip() or "Failed to open ChatGPT in Chrome.")
 
 
 def main() -> int:
@@ -248,7 +248,7 @@ def main() -> int:
         fetch_thread.start()
         replace_video_id = (
             transcript_module.extract_video_id(source)
-            if source_label == "active Comet tab"
+            if source_label == "active Chrome tab"
             else None
         )
         open_chatgpt(server.server_port, state.token, replace_video_id=replace_video_id)

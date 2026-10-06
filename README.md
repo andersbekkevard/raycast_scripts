@@ -28,7 +28,7 @@ lua tests/test_voice_keys_parser.lua
 ## Shared browser control (macOS)
 
 `browser-config.json` is the single browser preference for this repository.
-Change `default_browser` to `Aside`, `Comet`, `Google Chrome`, or `Safari`.
+Change `default_browser` to `Google Chrome` (the default), `Aside` or `Safari`.
 The `browsers` array lists browsers to inspect, in tie-break order; the helper
 also supports `Brave Browser` and `Microsoft Edge` when explicitly listed.
 Changes take effect on the next command, without regenerating scripts.
@@ -57,8 +57,8 @@ it does not track tab changes made between invocations.
 
 History lookup uses the selected Chromium browser's Default profile, with a
 read-only SQLite connection. Safari and unavailable/locked histories fall back
-to the command's default URL. The Comet-extension YouTube summary command is an
-explicit exception: its extension transport and destination remain Comet.
+to the command's default URL. The extension-based YouTube summary command is an
+explicit exception: its extension transport and destination are Google Chrome.
 The older non-extension Python summary script follows shared browser selection.
 
 Requires macOS, Python 3, Apple Events permission for the configured browsers,

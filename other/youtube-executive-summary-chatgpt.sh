@@ -11,7 +11,7 @@
 
 # Documentation:
 # @raycast.author Anders Bekkevard
-# @raycast.description Summarizes the active Comet YouTube video through the local Comet extension.
+# @raycast.description Summarizes the active Chrome YouTube video through the local Anders YouTube Summary extension.
 
 set -euo pipefail
 

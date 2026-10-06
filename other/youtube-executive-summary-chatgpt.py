@@ -107,7 +107,7 @@ def open_chatgpt_and_submit(prompt: str) -> None:
         raise RuntimeError(clipboard_result.stderr.strip() or "Failed to copy the prompt.")
 
     submit_script = r'''
-tell application "Comet" to activate
+tell application "Google Chrome" to activate
 delay 0.3
 tell application "System Events"
     key code 53
@@ -119,7 +119,7 @@ tell application "System Events"
 end tell
 
 repeat 30 times
-    tell application "Comet"
+    tell application "Google Chrome"
         try
             if URL of active tab of window 1 contains "chatgpt.com/c/" then return "submitted"
         end try
@@ -129,7 +129,7 @@ repeat 30 times
 end repeat
 return "not-submitted"
 '''
-    submit_script = submit_script.replace('"Comet"', '"' + browser + '"')
+    submit_script = submit_script.replace('"Google Chrome"', '"' + browser + '"')
     if browser == 'Safari':
         submit_script = submit_script.replace('active tab', 'current tab')
     result = run_command(["osascript"], input_text=submit_script)

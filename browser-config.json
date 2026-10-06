@@ -1,6 +1,10 @@
 {
-  "default_browser": "Comet",
-  "browsers": ["Aside", "Comet", "Google Chrome", "Safari"],
+  "default_browser": "Google Chrome",
+  "browsers": [
+    "Google Chrome",
+    "Aside",
+    "Safari"
+  ],
   "reuse_matching_tabs": true,
   "prefer_focused_browser": true,
   "reuse_single_open_browser": true,
