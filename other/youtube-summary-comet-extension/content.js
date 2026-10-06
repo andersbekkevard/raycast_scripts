@@ -96,15 +96,26 @@
     }));
   }
 
-  function findEnabledSendButton() {
-    const selectors = [
-      "button[data-testid='send-button']",
-      "button[aria-label='Send prompt']",
-      "button[aria-label='Send message']",
+  // The send button by structure first (the composer form's submit button),
+  // which works in any ChatGPT interface language; known labels as fallbacks.
+  function findEnabledSendButton(composer) {
+    const form = composer?.closest("form");
+    const candidates = [
+      form?.querySelector("button[type='submit']"),
+      document.querySelector("button[data-testid='send-button']"),
+      document.querySelector("button[data-testid='composer-submit-button']"),
+      ...["Send", "Send prompt", "Send message", "Send melding"].map((label) => document.querySelector(`button[aria-label='${label}']`)),
     ];
-    const button = selectors.map((selector) => document.querySelector(selector)).find(Boolean);
+    const button = candidates.find(Boolean);
     if (!button || button.disabled || button.getAttribute("aria-disabled") === "true") return null;
     return button;
+  }
+
+  function pressEnter(composer) {
+    composer.focus();
+    for (const type of ["keydown", "keypress", "keyup"]) {
+      composer.dispatchEvent(new KeyboardEvent(type, { key: "Enter", code: "Enter", keyCode: 13, which: 13, bubbles: true, cancelable: true }));
+    }
   }
 
   function waitForConversation(timeoutMs) {
@@ -136,9 +147,14 @@
     }
     await report("prompt_inserted");
 
-    const sendButton = await waitFor(findEnabledSendButton, 10000, "an enabled Send button");
-    sendButton.click();
-    await report("send_clicked");
+    const sendButton = await waitFor(() => findEnabledSendButton(composer), 10000, "an enabled Send button").catch(() => null);
+    if (sendButton) {
+      sendButton.click();
+      await report("send_clicked");
+    } else {
+      pressEnter(composer);
+      await report("send_enter");
+    }
 
     await waitForConversation(15000);
     await report("conversation_created", { url: location.href });
