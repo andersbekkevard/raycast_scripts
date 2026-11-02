@@ -70,3 +70,7 @@ Run `python3 lib/browser_control.py inspect` to see routing without changing tab
 Run `python3 -m unittest discover -s tests -p test_browser_control.py` for policy
 checks. `generate-history-scripts.sh` regenerates Raycast metadata wrappers from
 `focus-configs.json`, and works from any directory.
+
+## Wi-Fi to 5 GHz
+
+`other/wifi-5ghz.sh` runs `~/.local/bin/wifi5g` (from the dotfiles repository), which joins the strongest 5 or 6 GHz access point of a network, MIT SECURE by default. macOS has no per-network band preference, so use it when the Mac has drifted onto 2.4 GHz. Raycast needs Location Services access for the scan to see network names.
